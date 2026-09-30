@@ -1,63 +1,271 @@
-create table if not exists public.media_items (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  group_name text not null,
-  category_name text not null,
-  media_type text not null check (media_type in ('photo', 'video')),
-  storage_path text not null unique,
-  original_name text,
-  created_at timestamptz not null default now()
-);
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>K-POP メディア整理</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, sans-serif; color: #292333; background: #f7f4fa; }
+    header { padding: 22px max(16px, calc((100% - 900px) / 2)); background: #7041a1; color: white; }
+    header h1 { margin: 0 0 6px; }
+    main { max-width: 900px; margin: 22px auto; padding: 0 14px 40px; }
+    section, .card { background: white; border: 1px solid #eee8f2; border-radius: 14px; padding: 16px; margin-bottom: 16px; }
+    h2 { margin: 0 0 14px; font-size: 1.2rem; }
+    label { display: block; margin: 12px 0 6px; font-weight: 600; }
+    input, select, button { width: 100%; min-height: 44px; padding: 10px; border: 1px solid #e3dbea; border-radius: 9px; font: inherit; }
+    button { border: 0; background: #7041a1; color: white; font-weight: 700; cursor: pointer; }
+    button:disabled { opacity: .6; }
+    .secondary { background: #eee7f4; color: #56317f; }
+    .danger { background: #fff0f2; color: #b4233c; }
+    .row { display: flex; gap: 10px; align-items: center; }
+    .row > * { flex: 1; }
+    .small, .status { color: #756d7c; font-size: .9rem; }
+    .status { min-height: 1.4em; }
+    .hidden { display: none !important; }
+    .filters { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+    .card { padding: 9px; margin: 0; }
+    .card img, .card video { display: block; width: 100%; max-height: 340px; object-fit: contain; background: #17131c; border-radius: 9px; }
+    .card p { overflow-wrap: anywhere; }
+    @media (max-width: 560px) {
+      header { padding: 18px 14px; }
+      main { margin-top: 12px; padding: 0 9px 28px; }
+      .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .card { padding: 7px; }
+      .row { flex-direction: column; }
+      .row > * { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>K-POP メディア整理</h1>
+    <div>グループ・メンバー・ケミごとに写真や動画を整理</div>
+  </header>
 
-alter table public.media_items enable row level security;
+  <main>
+    <section id="loginPanel">
+      <h2>ログイン / アカウント作成</h2>
+      <label for="email">メールアドレス</label>
+      <input id="email" type="email" autocomplete="email">
+      <label for="password">パスワード（8文字以上）</label>
+      <input id="password" type="password" autocomplete="current-password">
+      <div class="row">
+        <button id="loginButton" type="button">ログイン</button>
+        <button id="signupButton" class="secondary" type="button">アカウント作成</button>
+      </div>
+      <p id="authStatus" class="status"></p>
+    </section>
 
-grant select, insert, update, delete on public.media_items to authenticated;
+    <div id="appPanel" class="hidden">
+      <section>
+        <div class="row">
+          <h2>写真・動画を追加</h2>
+          <button id="logoutButton" class="secondary" type="button">ログアウト</button>
+        </div>
+        <p id="accountName" class="small"></p>
+        <label for="groupName">グループ</label>
+        <input id="groupName" placeholder="例：グループ名">
+        <label for="categoryName">メンバー・ケミ</label>
+        <input id="categoryName" placeholder="例：メンバー名 / ケミ名">
+        <label for="files">スマホやパソコンから選ぶ</label>
+        <input id="files" type="file" accept="image/*,video/*" multiple>
+        <p class="small">写真・動画を選んでください。1ファイル50MBまでです。</p>
+        <button id="uploadButton" type="button">選んだ写真・動画を保存</button>
+        <p id="uploadStatus" class="status"></p>
+      </section>
 
-drop policy if exists "kpop_media_items_select_own" on public.media_items;
-create policy "kpop_media_items_select_own"
-on public.media_items for select to authenticated
-using ((select auth.uid()) = user_id);
+      <section>
+        <h2>整理したメディア</h2>
+        <div class="filters">
+          <input id="search" type="search" placeholder="グループ・メンバー・ケミで検索">
+          <select id="typeFilter">
+            <option value="all">写真と動画</option>
+            <option value="photo">写真だけ</option>
+            <option value="video">動画だけ</option>
+          </select>
+        </div>
+        <div id="gallery" class="gallery"></div>
+        <p id="galleryStatus" class="small"></p>
+      </section>
+    </div>
+  </main>
 
-drop policy if exists "kpop_media_items_insert_own" on public.media_items;
-create policy "kpop_media_items_insert_own"
-on public.media_items for insert to authenticated
-with check ((select auth.uid()) = user_id);
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://gbhicsozbzhkgvqqnbem.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_eYPNgfkyYC1-_r3LjSLosg_Y9iuSp_d";
+    const BUCKET = "kpop-media";
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    let user = null;
+    let items = [];
 
-drop policy if exists "kpop_media_items_update_own" on public.media_items;
-create policy "kpop_media_items_update_own"
-on public.media_items for update to authenticated
-using ((select auth.uid()) = user_id)
-with check ((select auth.uid()) = user_id);
+    const byId = id => document.getElementById(id);
+    const say = (id, text) => { byId(id).textContent = text; };
 
-drop policy if exists "kpop_media_items_delete_own" on public.media_items;
-create policy "kpop_media_items_delete_own"
-on public.media_items for delete to authenticated
-using ((select auth.uid()) = user_id);
+    async function login() {
+      say("authStatus", "ログインしています…");
+      const { error } = await db.auth.signInWithPassword({
+        email: byId("email").value.trim(),
+        password: byId("password").value
+      });
+      if (error) say("authStatus", "ログインできませんでした：" + error.message);
+    }
 
-insert into storage.buckets (id, name, public, file_size_limit)
-values ('kpop-media', 'kpop-media', false, 52428800)
-on conflict (id) do update set public = false;
+    async function signup() {
+      const password = byId("password").value;
+      if (password.length < 8) {
+        say("authStatus", "パスワードは8文字以上にしてください。");
+        return;
+      }
+      say("authStatus", "アカウントを作成しています…");
+      const { data, error } = await db.auth.signUp({
+        email: byId("email").value.trim(),
+        password
+      });
+      if (error) say("authStatus", "作成できませんでした：" + error.message);
+      else if (!data.session) say("authStatus", "確認メールを送りました。メールのリンクを開いてからログインしてください。");
+    }
 
-drop policy if exists "kpop_media_files_select_own" on storage.objects;
-create policy "kpop_media_files_select_own"
-on storage.objects for select to authenticated
-using (
-  bucket_id = 'kpop-media'
-  and (storage.foldername(name))[1] = (select auth.uid()::text)
-);
+    async function showUser(nextUser) {
+      user = nextUser;
+      byId("loginPanel").classList.toggle("hidden", !!user);
+      byId("appPanel").classList.toggle("hidden", !user);
+      if (user) {
+        byId("accountName").textContent = user.email || "";
+        await loadItems();
+      } else {
+        byId("gallery").replaceChildren();
+        items = [];
+      }
+    }
 
-drop policy if exists "kpop_media_files_insert_own" on storage.objects;
-create policy "kpop_media_files_insert_own"
-on storage.objects for insert to authenticated
-with check (
-  bucket_id = 'kpop-media'
-  and (storage.foldername(name))[1] = (select auth.uid()::text)
-);
+    async function loadItems() {
+      say("galleryStatus", "読み込み中…");
+      const { data, error } = await db.from("media_items").select("*").order("created_at", { ascending: false });
+      if (error) {
+        say("galleryStatus", "読み込めませんでした：" + error.message);
+        return;
+      }
+      items = data || [];
+      await Promise.all(items.map(async item => {
+        const { data: signed } = await db.storage.from(BUCKET).createSignedUrl(item.storage_path, 3600);
+        if (signed) item.url = signed.signedUrl;
+      }));
+      renderItems();
+    }
 
-drop policy if exists "kpop_media_files_delete_own" on storage.objects;
-create policy "kpop_media_files_delete_own"
-on storage.objects for delete to authenticated
-using (
-  bucket_id = 'kpop-media'
-  and (storage.foldername(name))[1] = (select auth.uid()::text)
-);
+    function renderItems() {
+      const query = byId("search").value.trim().toLowerCase();
+      const type = byId("typeFilter").value;
+      const matches = items.filter(item =>
+        (type === "all" || item.media_type === type) &&
+        (item.group_name + " " + item.category_name).toLowerCase().includes(query)
+      );
+
+      const gallery = byId("gallery");
+      gallery.replaceChildren();
+      for (const item of matches) {
+        if (!item.url) continue;
+        const card = document.createElement("article");
+        card.className = "card";
+        const media = document.createElement(item.media_type === "photo" ? "img" : "video");
+        media.src = item.url;
+        media.alt = item.original_name || "";
+        if (item.media_type === "video") {
+          media.controls = true;
+          media.playsInline = true;
+        }
+        card.appendChild(media);
+
+        const title = document.createElement("p");
+        title.textContent = item.group_name + " / " + item.category_name;
+        card.appendChild(title);
+
+        const name = document.createElement("p");
+        name.className = "small";
+        name.textContent = (item.media_type === "photo" ? "写真" : "動画") + " ・ " + (item.original_name || "");
+        card.appendChild(name);
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "danger";
+        remove.textContent = "削除";
+        remove.onclick = () => deleteItem(item);
+        card.appendChild(remove);
+        gallery.appendChild(card);
+      }
+      say("galleryStatus", matches.length ? "" : "まだメディアはありません。");
+    }
+
+    async function upload() {
+      if (!user) return;
+      const group = byId("groupName").value.trim();
+      const category = byId("categoryName").value.trim();
+      const files = Array.from(byId("files").files || []);
+      if (!group || !category) return say("uploadStatus", "グループとメンバー・ケミを入力してください。");
+      if (!files.length) return say("uploadStatus", "写真か動画を選んでください。");
+
+      const button = byId("uploadButton");
+      button.disabled = true;
+      let saved = 0;
+      for (const file of files) {
+        const mediaType = file.type.startsWith("image/") ? "photo" :
+          file.type.startsWith("video/") ? "video" : null;
+        if (!mediaType || file.size > 50 * 1024 * 1024) continue;
+
+        const safeName = file.name.replace(/[^\w.\-]+/g, "_");
+        const path = user.id + "/" + crypto.randomUUID() + "_" + safeName;
+        say("uploadStatus", "保存中…");
+        const { error: fileError } = await db.storage.from(BUCKET).upload(path, file, { upsert: false });
+        if (fileError) {
+          say("uploadStatus", "保存できませんでした：" + fileError.message);
+          continue;
+        }
+
+        const { error: rowError } = await db.from("media_items").insert({
+          user_id: user.id,
+          group_name: group,
+          category_name: category,
+          media_type: mediaType,
+          storage_path: path,
+          original_name: file.name
+        });
+        if (rowError) {
+          await db.storage.from(BUCKET).remove([path]);
+          say("uploadStatus", "分類情報を保存できませんでした：" + rowError.message);
+          continue;
+        }
+        saved++;
+      }
+      byId("files").value = "";
+      button.disabled = false;
+      say("uploadStatus", saved + "件を保存しました。");
+      await loadItems();
+    }
+
+    async function deleteItem(item) {
+      if (!confirm("この写真・動画を削除しますか？")) return;
+      const { error: fileError } = await db.storage.from(BUCKET).remove([item.storage_path]);
+      if (fileError) return say("galleryStatus", "ファイルを削除できませんでした：" + fileError.message);
+      const { error } = await db.from("media_items").delete().eq("id", item.id);
+      if (error) return say("galleryStatus", "分類情報を削除できませんでした：" + error.message);
+      await loadItems();
+    }
+
+    byId("loginButton").onclick = login;
+    byId("signupButton").onclick = signup;
+    byId("logoutButton").onclick = () => db.auth.signOut();
+    byId("uploadButton").onclick = upload;
+    byId("search").oninput = renderItems;
+    byId("typeFilter").onchange = renderItems;
+
+    db.auth.onAuthStateChange((_event, session) => {
+      setTimeout(() => showUser(session ? session.user : null), 0);
+    });
+    db.auth.getSession().then(({ data }) => showUser(data.session ? data.session.user : null));
+  </script>
+</body>
+</html>
+``)
