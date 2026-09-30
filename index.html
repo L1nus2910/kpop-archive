@@ -1,125 +1,63 @@
-<!doctype html>
-<html lang="ja">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>K-POP メディア整理</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: system-ui, sans-serif;
-      background: #f8f5fb;
-      color: #292333;
-    }
-    header {
-      padding: 24px 18px;
-      background: #7446a8;
-      color: white;
-    }
-    main {
-      max-width: 760px;
-      margin: 24px auto;
-      padding: 0 16px;
-    }
-    section, .card {
-      background: white;
-      border-radius: 14px;
-      padding: 18px;
-      margin-bottom: 18px;
-      box-shadow: 0 2px 10px #0000000d;
-    }
-    input, select, button {
-      box-sizing: border-box;
-      width: 100%;
-      margin: 6px 0 12px;
-      padding: 11px;
-      border: 1px solid #d9d1e2;
-      border-radius: 9px;
-      font: inherit;
-    }
-    button {
-      border: 0;
-      background: #7446a8;
-      color: white;
-      cursor: pointer;
-    }
-    .media-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 12px;
-    }
-    .media-grid img, .media-grid video {
-      width: 100%;
-      border-radius: 10px;
-    }
-    .small {
-      color: #6d6574;
-      font-size: 0.9rem;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>K-POP メディア整理</h1>
-    <p>グループ・メンバー・ケミごとに写真や動画を整理</p>
-  </header>
+create table if not exists public.media_items (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  group_name text not null,
+  category_name text not null,
+  media_type text not null check (media_type in ('photo', 'video')),
+  storage_path text not null unique,
+  original_name text,
+  created_at timestamptz not null default now()
+);
 
-  <main>
-    <section>
-      <h2>写真・動画を追加</h2>
-      <label>グループ<input id="group" placeholder="例：グループ名"></label>
-      <label>メンバー・ケミ<input id="person" placeholder="例：メンバー名 / ケミ名"></label>
-      <label>種類
-        <select id="kind">
-          <option value="写真">写真</option>
-          <option value="動画">動画</option>
-        </select>
-      </label>
-      <label>スマホやパソコンから選ぶ
-        <input id="files" type="file" accept="image/*,video/*" multiple>
-      </label>
-      <button id="add">選んだメディアを表示</button>
-      <p class="small">試作版です。追加した内容はこのブラウザー内だけに表示されます。</p>
-    </section>
+alter table public.media_items enable row level security;
 
-    <section>
-      <h2>整理したメディア</h2>
-      <div id="gallery" class="media-grid"></div>
-    </section>
-  </main>
+grant select, insert, update, delete on public.media_items to authenticated;
 
-  <script>
-    const filesInput = document.getElementById("files");
-    const gallery = document.getElementById("gallery");
+drop policy if exists "kpop_media_items_select_own" on public.media_items;
+create policy "kpop_media_items_select_own"
+on public.media_items for select to authenticated
+using ((select auth.uid()) = user_id);
 
-    document.getElementById("add").addEventListener("click", () => {
-      const group = document.getElementById("group").value.trim() || "グループ未設定";
-      const person = document.getElementById("person").value.trim() || "メンバー・ケミ未設定";
-      const kind = document.getElementById("kind").value;
+drop policy if exists "kpop_media_items_insert_own" on public.media_items;
+create policy "kpop_media_items_insert_own"
+on public.media_items for insert to authenticated
+with check ((select auth.uid()) = user_id);
 
-      for (const file of filesInput.files) {
-        const card = document.createElement("article");
-        card.className = "card";
+drop policy if exists "kpop_media_items_update_own" on public.media_items;
+create policy "kpop_media_items_update_own"
+on public.media_items for update to authenticated
+using ((select auth.uid()) = user_id)
+with check ((select auth.uid()) = user_id);
 
-        const title = document.createElement("p");
-        title.textContent = `${group} / ${person} / ${kind}`;
-        card.appendChild(title);
+drop policy if exists "kpop_media_items_delete_own" on public.media_items;
+create policy "kpop_media_items_delete_own"
+on public.media_items for delete to authenticated
+using ((select auth.uid()) = user_id);
 
-        const url = URL.createObjectURL(file);
-        const media = document.createElement(kind === "写真" ? "img" : "video");
-        media.src = url;
-        if (kind === "動画") media.controls = true;
-        card.appendChild(media);
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('kpop-media', 'kpop-media', false, 52428800)
+on conflict (id) do update set public = false;
 
-        const name = document.createElement("p");
-        name.className = "small";
-        name.textContent = file.name;
-        card.appendChild(name);
+drop policy if exists "kpop_media_files_select_own" on storage.objects;
+create policy "kpop_media_files_select_own"
+on storage.objects for select to authenticated
+using (
+  bucket_id = 'kpop-media'
+  and (storage.foldername(name))[1] = (select auth.uid()::text)
+);
 
-        gallery.prepend(card);
-      }
-      filesInput.value = "";
-    });
-  </script>
-</body>
-</html>
+drop policy if exists "kpop_media_files_insert_own" on storage.objects;
+create policy "kpop_media_files_insert_own"
+on storage.objects for insert to authenticated
+with check (
+  bucket_id = 'kpop-media'
+  and (storage.foldername(name))[1] = (select auth.uid()::text)
+);
+
+drop policy if exists "kpop_media_files_delete_own" on storage.objects;
+create policy "kpop_media_files_delete_own"
+on storage.objects for delete to authenticated
+using (
+  bucket_id = 'kpop-media'
+  and (storage.foldername(name))[1] = (select auth.uid()::text)
+);
