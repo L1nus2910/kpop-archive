@@ -79,10 +79,10 @@ main{max-width:1180px;margin:0 auto;padding-block:18px 120px;padding-left:max(16
 
 /* tab bar */
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--glass-strong);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);border-top:1px solid var(--line);
-  display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
-.tabbar button{border:0;background:none;padding:8px 2px 7px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;color:var(--muted);font-weight:500}
+  display:grid;grid-template-columns:repeat(6,1fr);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.tabbar button{border:0;background:none;padding:8px 0 7px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;letter-spacing:-.02em;white-space:nowrap;color:var(--muted);font-weight:500}
 .tabbar button.on{color:var(--pink)}
-.tabbar .tab-add span.ic{width:46px;height:46px;margin-top:-20px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,var(--pink),var(--lilac));color:var(--on-accent);box-shadow:0 8px 20px rgba(217,74,136,.35)}
+.tabbar .tab-add span.ic{width:44px;height:44px;margin-top:-18px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,var(--pink),var(--lilac));color:var(--on-accent);box-shadow:0 8px 20px rgba(217,74,136,.35)}
 @media (min-width:860px){.tabbar{display:none}}
 svg.i{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
@@ -276,6 +276,34 @@ details.presets summary{cursor:pointer;font-size:13px;font-weight:700;color:var(
 .swatches button.on{border-color:var(--ink)}
 .picklist{display:flex;flex-wrap:wrap;gap:6px;max-height:180px;overflow-y:auto;padding:2px}
 
+/* calendar */
+.cal-layout{display:grid;gap:16px}
+@media (min-width:900px){.cal-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}}
+.cal-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cal-head h3{font-family:var(--display);font-size:19px;font-variant-numeric:tabular-nums;min-width:7.5em;text-align:center}
+.cal-head .lb-btn{background:var(--glass-strong);color:var(--ink);border:1px solid var(--line)}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal .wd{text-align:center;font-size:11px;font-weight:700;color:var(--muted);padding:2px 0}
+.cal .wd.sun{color:var(--pink)} .cal .wd.sat{color:var(--sky)}
+.cday{position:relative;aspect-ratio:1;max-width:100%;border:1px solid var(--line);background:var(--glass-strong);border-radius:10px;padding:0;overflow:hidden;display:block}
+.cday.out{visibility:hidden}
+.cday img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cday .num{position:absolute;left:5px;top:2px;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;z-index:1}
+.cday.sun .num{color:var(--pink)} .cday.sat .num{color:var(--sky)}
+.cday.has .num{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+.cday .cnt{position:absolute;right:3px;bottom:3px;z-index:1;background:var(--pink);color:var(--on-accent);border-radius:8px;font-size:10.5px;padding:0 6px;font-variant-numeric:tabular-nums;line-height:1.6}
+.cday.today{box-shadow:inset 0 0 0 2px var(--pink)}
+.cday.sel{outline:3px solid var(--lilac);outline-offset:1px}
+.cal-sum{display:flex;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.cal-sum b{color:var(--ink);font-variant-numeric:tabular-nums}
+.daylist{display:flex;flex-direction:column;gap:6px}
+.dayrow{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--glass-strong);border-radius:12px;padding:6px 10px 6px 6px;text-align:left}
+.dayrow img,.dayrow .ph0{width:40px;height:40px;border-radius:8px;object-fit:cover;background:var(--lilac-soft);flex:none}
+.dayrow .t{flex:1;min-width:0;font-size:13px}
+.dayrow .t b{display:block;font-variant-numeric:tabular-nums}
+.dayrow .t span{color:var(--muted);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.tile .date{position:absolute;right:6px;bottom:6px;font-size:10px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.8);font-variant-numeric:tabular-nums}
+.selecting .tile .date{display:none}
 #toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:13.5px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100% - 32px)}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .warn{background:var(--pink-soft);color:var(--ink);border-radius:12px;padding:10px 14px;font-size:13px}
@@ -301,6 +329,7 @@ details.presets summary{cursor:pointer;font-size:13px;font-weight:700;color:var(
   <section class="view" id="v-home"></section>
   <section class="view" id="v-library" hidden></section>
   <section class="view" id="v-add" hidden></section>
+  <section class="view" id="v-calendar" hidden></section>
   <section class="view" id="v-collection" hidden></section>
   <section class="view" id="v-room" hidden></section>
 </main>
@@ -344,6 +373,7 @@ const P={
  wall:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M3 15l5-4 4 3 3-2 6 5"/><circle cx="16" cy="8" r="1.6"/>',
  box:'<path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/>',
  select:'<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+ cal:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="8" cy="14.5" r=".8" fill="currentColor"/><circle cx="12" cy="14.5" r=".8" fill="currentColor"/>',
  video:'<rect x="3" y="6" width="13" height="12" rx="3"/><path d="M16 10l5-3v10l-5-3z"/>',
 };
 const ic=(n,cls='')=>`<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[n]||''}</svg>`;
@@ -384,7 +414,9 @@ const blankF=()=>({cat:'all',kind:'all',agency:'',gen:'',group:'',member:'',chem
 const F={library:blankF(),collection:blankF()};
 let VIEW='home';
 const SHOWN={library:120,collection:120};
-const LAST={library:[],collection:[],home:[]};
+const LAST={library:[],collection:[],home:[],calendar:[]};
+const CAL={y:new Date().getFullYear(),m:new Date().getMonth(),day:'',basis:'added'};
+const tsOf=m=>CAL.basis==='taken'?(m.taken||m.added):m.added;
 const SEL={on:false,ids:new Set(),view:null};
 const urlCache=new Map();
 function thumbURL(m){if(!m||!m.thumb)return null;let u=urlCache.get(m.id);if(!u){u=URL.createObjectURL(m.thumb);urlCache.set(m.id,u)}return u;}
@@ -393,6 +425,9 @@ function dropURL(id){const u=urlCache.get(id);if(u){URL.revokeObjectURL(u);urlCa
 /* ---------- helpers ---------- */
 const toast=(msg)=>{const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2400);};
 const fmtDate=ts=>{const d=new Date(ts);return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`};
+const fmtDT=ts=>{const d=new Date(ts);return `${fmtDate(ts)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`};
+const dkey=ts=>{const d=new Date(ts);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+const WD=['日','月','火','水','木','金','土'];
 const fmtSize=b=>b>1073741824?(b/1073741824).toFixed(2)+' GB':b>1048576?(b/1048576).toFixed(1)+' MB':Math.max(1,Math.round(b/1024))+' KB';
 function groupsOfMedia(m){return (m.groupIds||[]).map(id=>G.get(id)).filter(Boolean)}
 function titleOf(m){
@@ -457,7 +492,7 @@ function filtered(view){const f=F[view];const list=[...MEDIA.values()].filter(m=
 function activeCount(f){return ['agency','gen','group','member','chemi'].filter(k=>f[k]).length+(f.cat!=='all'?1:0)+(f.kind!=='all'?1:0)}
 
 /* ---------- navigation ---------- */
-const TABS=[['home','ホーム','home'],['library','ライブラリ','grid'],['add','追加','plus'],['collection','コレクション','star'],['room','My Room','room']];
+const TABS=[['home','ホーム','home'],['library','ライブラリ','grid'],['add','追加','plus'],['calendar','カレンダー','cal'],['collection','コレクション','star'],['room','My Room','room']];
 function drawNav(){
   $('#tabbar').innerHTML=TABS.map(([v,l,i])=>`<button data-go="${v}" class="${v==='add'?'tab-add':''} ${VIEW===v?'on':''}"><span class="ic">${ic(i)}</span>${l}</button>`).join('');
   $('#topnav').innerHTML=TABS.map(([v,l,i])=>`<button data-go="${v}" class="${VIEW===v?'on':''}">${ic(i)}${l}</button>`).join('');
@@ -471,7 +506,7 @@ function go(v,opts={}){
   if(opts.focus){setTimeout(()=>{const el=$(`#${v}-q`);el&&el.focus()},50)}
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(!b)return;e.preventDefault();go(b.dataset.go,{focus:b.dataset.focus});});
-function render(v){({home:renderHome,library:()=>renderGridView('library'),add:renderAdd,collection:()=>renderGridView('collection'),room:renderRoom})[v]?.();}
+function render(v){({home:renderHome,library:()=>renderGridView('library'),add:renderAdd,calendar:renderCalendar,collection:()=>renderGridView('collection'),room:renderRoom})[v]?.();}
 function refresh(){render(VIEW)}
 
 /* ---------- HOME ---------- */
@@ -498,7 +533,7 @@ function renderHome(){
     <div class="menu">
       <button class="mtile" data-go="add"><span class="ic c-pink">${ic('plus')}</span><b>まとめて追加</b><small>ADD MEDIA</small></button>
       <button class="mtile" data-go="library"><span class="ic c-sky">${ic('grid')}</span><b>ライブラリ</b><small>LIBRARY</small></button>
-      <button class="mtile" data-go="library" data-focus="q"><span class="ic c-lilac">${ic('search')}</span><b>条件で探す</b><small>SEARCH</small></button>
+      <button class="mtile" data-go="calendar"><span class="ic c-lilac">${ic('cal')}</span><b>カレンダー</b><small>CALENDAR</small></button>
       <button class="mtile" data-go="collection"><span class="ic c-pink">${ic('star')}</span><b>My Collection</b><small>FAVORITES</small></button>
       <button class="mtile" data-act="go-room-wall"><span class="ic c-mint">${ic('wall')}</span><b>壁紙を変える</b><small>WALLPAPER</small></button>
       <button class="mtile" data-act="go-room-groups"><span class="ic c-sky">${ic('users')}</span><b>グループ管理</b><small>GROUPS</small></button>
@@ -526,7 +561,7 @@ function tileHTML(m){const u=thumbURL(m);
    <span class="cat">${CAT_SHORT[m.cat]||''}</span>
    ${m.kind==='video'?`<span class="kind">${ic('play')}動画</span>`:''}
    <button class="star ${m.fav?'on':''}" data-star="${m.id}" aria-label="${m.fav?'My Collectionから外す':'My Collectionに追加'}">${m.fav?'★':'☆'}</button>
-   <span class="sel"></span><span class="selc">✓</span></div>`;}
+   <span class="date">${fmtDate(m.added).slice(5)}</span><span class="sel"></span><span class="selc">✓</span></div>`;}
 async function hydrate(root){
   for(const el of $$('[data-full]',root)){const id=el.dataset.full;const m=MEDIA.get(id);if(!m||m.kind!=='photo')continue;
     const blob=await getFile(id);if(!blob)continue;const u=URL.createObjectURL(blob);urlCache.set(id,u);const img=new Image();img.alt='';img.src=u;img.onload=()=>el.replaceWith(img);}
@@ -819,7 +854,7 @@ async function drawLB(){
    <div class="lb-info"><div class="t">${esc(titleOf(m))} <span style="opacity:.6;font-weight:400;font-size:12px">· ${CAT_LABEL[m.cat]||''}</span></div>
     <div class="chips">${gs.map(g=>`<span class="chip"><span class="dot" style="--gcol:${esc(g.color)}"></span>${esc(g.name)}</span><span class="chip">${esc(g.agency||'事務所未設定')}</span><span class="chip">${genLabel(g.gen)}</span>`).join('')}
      ${m.cat!=='member'?mem.map(x=>`<span class="chip">${esc(x.name)}</span>`).join(''):''}${(m.tags||[]).map(t=>`<span class="chip">#${esc(t)}</span>`).join('')}</div>
-    ${m.memo?`<div>${esc(m.memo)}</div>`:''}<div class="meta">${fmtDate(m.added)} 追加 · ${esc(m.name||'')} · ${fmtSize(m.size||0)}</div></div>`;
+    ${m.memo?`<div>${esc(m.memo)}</div>`:''}<div class="meta">${fmtDT(m.added)} に追加${m.taken?` · ファイルの日付 ${fmtDate(m.taken)}`:''} · ${esc(m.name||'')} · ${fmtSize(m.size||0)}</div></div>`;
 }
 $('#lightbox').addEventListener('click',async e=>{const a=e.target.closest('[data-lb]')?.dataset.lb;if(!a)return;const m=MEDIA.get(LB.ids[LB.i]);
   if(a==='close')closeLB();
@@ -881,7 +916,7 @@ async function saveAdd(){
   const n=ADD.files.length;let ok=0,fail=0;const base=Date.now();
   for(let i=0;i<n;i++){const f=ADD.files[i];pt.textContent=`${i+1} / ${n} 件を保存中…`;
     try{const thumb=await makeThumb(f.file,f.kind);
-      const m={id:uid(),kind:f.kind,cat:'group',groupIds:[],memberIds:[],chemiId:null,tags:[],memo:'',fav:false,added:base+i,name:f.file.name,mime:f.file.type,size:f.file.size,thumb};
+      const m={id:uid(),kind:f.kind,cat:'group',groupIds:[],memberIds:[],chemiId:null,tags:[],memo:'',fav:false,added:base+i,name:f.file.name,mime:f.file.type,size:f.file.size,taken:f.file.lastModified||null,thumb};
       applyTag(m,ADD.st,false);await saveItem(m,f.file);MEDIA.set(m.id,m);ok++;
     }catch(e){fail++;console.error(e)}
     bar.style.width=`${Math.round((i+1)/n*100)}%`;}
@@ -892,6 +927,51 @@ async function saveAdd(){
   ADD.st.tags='';ADD.st.memo='';
   go('library');
 }
+
+/* ---------- CALENDAR ---------- */
+function renderCalendar(){
+  const root=$('#v-calendar');const all=[...MEDIA.values()];
+  const byDay=new Map();all.forEach(m=>{const k=dkey(tsOf(m));if(!byDay.has(k))byDay.set(k,[]);byDay.get(k).push(m)});
+  byDay.forEach(l=>l.sort((a,b)=>tsOf(b)-tsOf(a)));
+  const y=CAL.y,mo=CAL.m;const first=new Date(y,mo,1),days=new Date(y,mo+1,0).getDate(),lead=first.getDay();
+  const today=dkey(Date.now());const pre=`${y}-${String(mo+1).padStart(2,'0')}-`;
+  const monthItems=all.filter(m=>dkey(tsOf(m)).startsWith(pre));
+  const activeDays=[...byDay.keys()].filter(k=>k.startsWith(pre)).sort().reverse();
+  if(CAL.day&&!CAL.day.startsWith(pre))CAL.day='';
+  if(!CAL.day)CAL.day=byDay.has(today)&&today.startsWith(pre)?today:(activeDays[0]||'');
+  let cells='';for(let i=0;i<lead;i++)cells+='<span class="cday out" aria-hidden="true"></span>';
+  for(let d=1;d<=days;d++){const k=pre+String(d).padStart(2,'0');const l=byDay.get(k)||[];const wd=(lead+d-1)%7;const cover=l.find(m=>m.thumb);
+    cells+=`<button class="cday ${l.length?'has':''} ${wd===0?'sun':wd===6?'sat':''} ${k===today?'today':''} ${k===CAL.day?'sel':''}" data-cday="${k}" aria-label="${mo+1}月${d}日 ${l.length}件">${cover?`<img src="${thumbURL(cover)}" alt="">`:''}<span class="num">${d}</span>${l.length?`<span class="cnt">${l.length}</span>`:''}</button>`;}
+  const dayList=CAL.day?(byDay.get(CAL.day)||[]):[];LAST.calendar=dayList.map(m=>m.id);
+  const dd=CAL.day?new Date(CAL.day+'T00:00:00'):null;
+  const basisWord=CAL.basis==='taken'?'の日付':'に追加';
+  root.innerHTML=`<div class="sec-h"><div><div class="eyebrow">CALENDAR</div><h2>カレンダー</h2></div></div>
+  <div class="cal-layout">
+   <div class="panel" style="display:flex;flex-direction:column;gap:12px">
+    <div class="cal-head"><button class="lb-btn" data-cal="prev" aria-label="前の月">${ic('left')}</button><h3>${y}年${mo+1}月</h3><button class="lb-btn" data-cal="next" aria-label="次の月">${ic('right')}</button><button class="btn sm ghost" data-cal="today">今月</button></div>
+    <div class="seg" role="group" aria-label="日付の基準"><button class="${CAL.basis==='added'?'on':''}" data-cbasis="added">追加した日</button><button class="${CAL.basis==='taken'?'on':''}" data-cbasis="taken">写真ファイルの日付</button></div>
+    <div class="cal">${WD.map((w,i)=>`<span class="wd ${i===0?'sun':i===6?'sat':''}">${w}</span>`).join('')}${cells}</div>
+    <div class="cal-sum"><span>この月：<b>${monthItems.length}</b>件</span><span>写真 <b>${monthItems.filter(m=>m.kind==='photo').length}</b></span><span>動画 <b>${monthItems.filter(m=>m.kind==='video').length}</b></span><span>記録した日 <b>${activeDays.length}</b>日</span></div>
+    ${CAL.basis==='taken'?'<p class="note" style="margin:0">「写真ファイルの日付」はファイルに残っている日付です。撮影日や保存した日になることが多く、ない場合は追加した日で表示します。</p>':''}
+   </div>
+   <div class="panel" style="display:flex;flex-direction:column;gap:12px">
+    ${dd?`<div class="sec-h"><h2 style="font-size:16px">${dd.getMonth()+1}月${dd.getDate()}日（${WD[dd.getDay()]}）${basisWord}</h2><span class="muted" style="font-size:13px">${dayList.length}件</span></div>
+     ${dayList.length?`<div class="grid" data-view="calendar">${dayList.map(tileHTML).join('')}</div>`:'<p class="note" style="margin:0">この日の写真・動画はありません。</p>'}`
+     :emptyHTML('cal','c-lilac','この月の記録はまだありません','写真や動画を追加すると、その日のマスにサムネイルと件数が表示されます。','<button class="btn primary" data-go="add">'+ic('plus')+'まとめて追加</button>')}
+    ${activeDays.length>1?`<div class="flabel" style="margin-top:4px">この月の記録</div><div class="daylist">${activeDays.map(k=>{const l=byDay.get(k);const d=new Date(k+'T00:00:00');const c=l.find(m=>m.thumb);const names=[...new Set(l.map(titleOf))].slice(0,4).join('、');return `<button class="dayrow" data-cday="${k}">${c?`<img src="${thumbURL(c)}" alt="">`:'<span class="ph0"></span>'}<span class="t"><b>${d.getMonth()+1}/${d.getDate()}（${WD[d.getDay()]}）· ${l.length}件</b><span>${esc(names)}</span></span></button>`}).join('')}</div>`:''}
+   </div>
+  </div>`;
+  hydrate(root);
+}
+$('#v-calendar').addEventListener('click',e=>{
+  const c=e.target.closest('[data-cday]');if(c){CAL.day=c.dataset.cday;renderCalendar();if(c.classList.contains('dayrow'))$('#v-calendar .cal-layout > .panel:last-child')?.scrollIntoView({behavior:'smooth',block:'start'});return;}
+  const b=e.target.closest('[data-cbasis]');if(b){CAL.basis=b.dataset.cbasis;CAL.day='';renderCalendar();return;}
+  const a=e.target.closest('[data-cal]')?.dataset.cal;if(!a)return;
+  if(a==='prev'){CAL.m--;if(CAL.m<0){CAL.m=11;CAL.y--}}
+  if(a==='next'){CAL.m++;if(CAL.m>11){CAL.m=0;CAL.y++}}
+  if(a==='today'){const d=new Date();CAL.y=d.getFullYear();CAL.m=d.getMonth()}
+  CAL.day='';renderCalendar();
+});
 
 /* ---------- ROOM ---------- */
 async function renderRoom(){
