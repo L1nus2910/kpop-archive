@@ -359,6 +359,53 @@ details.presets summary{cursor:pointer;font-size:13px;font-weight:700;color:var(
 .iconpick img{width:100%;height:100%;object-fit:cover}
 .icon-prev{width:120px;align-self:center}
 .theme-btn{border:1px solid var(--line);background:var(--glass);width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:none}
+/* pinterest-style boards */
+.boards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 14px}
+@media (min-width:700px){.boards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:1000px){.boards{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.board{display:flex;flex-direction:column;gap:2px;min-width:0;cursor:pointer;position:relative;border-radius:20px;outline-offset:3px}
+.collage{display:grid;gap:2px;border-radius:18px;overflow:hidden;aspect-ratio:3/2;max-width:100%;background:var(--accent-soft);transition:transform .15s ease,box-shadow .15s ease}
+.board:hover .collage{transform:translateY(-2px);box-shadow:var(--shadow)}
+.collage.big{grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr}
+.collage.big>span:first-child{grid-row:1/3}
+.collage.strip{grid-template-columns:repeat(3,1fr);aspect-ratio:2.6/1}
+.collage>span{position:relative;overflow:hidden;background:var(--lilac-soft);display:grid;place-items:center;color:var(--accent);font-family:var(--display);font-style:italic;font-weight:800;font-size:clamp(18px,5vw,28px)}
+.collage>span:nth-child(2){background:var(--accent-soft)} .collage>span:nth-child(3){background:var(--sky-soft)}
+.collage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.collage.add{border:2px dashed var(--line);background:transparent;display:grid;place-items:center;color:var(--muted)}
+.collage.add svg.i{width:30px;height:30px}
+.board h4{margin:8px 2px 0;font-size:15px;font-weight:700;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.board small{margin:0 2px;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.board .edit{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(255,255,255,.88);color:#16213f;display:grid;place-items:center;padding:0;box-shadow:var(--shadow-sm);z-index:2}
+.board .edit svg.i{width:16px;height:16px}
+.bhero{display:flex;flex-direction:column;gap:10px}
+.bhero .cover{position:relative;width:100%;max-width:600px;aspect-ratio:16/10;border-radius:28px;overflow:hidden;background:var(--accent-soft);box-shadow:var(--shadow);display:grid;place-items:center;color:var(--accent);font-family:var(--display);font-style:italic;font-weight:800;font-size:48px}
+.bhero .cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.bhero .cover .acts{position:absolute;top:12px;right:12px;display:flex;gap:8px}
+.bhero .cover .acts button{width:44px;height:44px;border-radius:14px;border:0;background:rgba(255,255,255,.9);color:#16213f;display:grid;place-items:center;box-shadow:var(--shadow-sm)}
+.bhero h1{font-family:var(--display);font-style:italic;font-weight:800;font-size:clamp(28px,8vw,44px);line-height:1.05;overflow-wrap:anywhere;margin-top:6px}
+.bhero h1 .emo{font-style:normal;margin-left:.15em}
+.bhero .meta{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bhero .desc{margin:0;font-size:14px;line-height:1.75;max-width:60em;white-space:pre-wrap}
+.bhero .desc.clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.bhero .more-desc{border:0;background:none;padding:0;font-weight:700;color:var(--ink);font-size:13.5px;align-self:flex-start}
+.bsec{display:flex;flex-direction:column;gap:12px}
+.bsec-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.bsec-h h3{font-size:17px;font-weight:700}
+.bsec-h span{font-size:12.5px;color:var(--muted)}
+.bsec-h .btn{margin-left:auto}
+.bview{display:flex;flex-direction:column;gap:28px}
+.masonry{column-count:2;column-gap:10px}
+@media (min-width:600px){.masonry{column-count:3}}
+@media (min-width:980px){.masonry{column-count:5}}
+.masonry .tile{aspect-ratio:auto;break-inside:avoid;margin-bottom:10px;border-radius:16px;display:block;width:100%}
+.masonry .tile img{height:auto}
+.masonry .tile .ph{position:static;min-height:140px}
+.masonry .tile .sel{border-radius:16px}
+.masonry.nocat .tile .cat{display:none}
+.subhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.subhead h2{font-family:var(--display);font-style:italic;font-weight:800;font-size:clamp(24px,7vw,34px)}
+.subhead .btn{margin-left:auto}
 #toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:13.5px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100% - 32px)}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .warn{background:var(--accent-soft);color:var(--ink);border-radius:12px;padding:10px 14px;font-size:13px}
@@ -462,11 +509,15 @@ const getMeta=k=>req('meta','readonly',t=>t.objectStore('meta').get(k));
 const putMeta=(k,v)=>req('meta','readwrite',t=>{t.objectStore('meta').put(v,k)});
 
 /* ---------- state ---------- */
-let CAT={agencies:[...PRESET_AGENCIES],groups:[],members:[],chemis:[]};
+let CAT={agencies:[...PRESET_AGENCIES],groups:[],members:[],chemis:[],subs:[]};
 let SET={shade:.55,blur:0};
 let MEDIA=new Map();
 let G=new Map(),M=new Map(),C=new Map();
-function indexCat(){G=new Map(CAT.groups.map(g=>[g.id,g]));M=new Map(CAT.members.map(m=>[m.id,m]));C=new Map(CAT.chemis.map(c=>[c.id,c]));}
+function indexCat(){G=new Map(CAT.groups.map(g=>[g.id,g]));M=new Map(CAT.members.map(m=>[m.id,m]));C=new Map(CAT.chemis.map(c=>[c.id,c]));
+  CAT.subs=(CAT.subs||[]).filter(x=>ownerExists(x.owner));S=new Map(CAT.subs.map(x=>[x.id,x]));}
+let S=new Map();
+function ownerExists(k){const [t,id]=String(k).split(':');return t==='g'?G.has(id):t==='m'?M.has(id):t==='c'?C.has(id):false;}
+function ownerInfo(k){const [t,id]=String(k||'').split(':');const o=t==='g'?G.get(id):t==='m'?M.get(id):t==='c'?C.get(id):null;return o?{t,id,o,name:o.name}:null;}
 async function saveCat(){indexCat();try{await putMeta('catalog',CAT)}catch(e){}}
 const blankF=()=>({cat:'all',kind:'all',agency:'',gen:'',group:'',member:'',chemi:'',q:'',sort:'new',open:false});
 const F={library:blankF(),collection:blankF()};
@@ -478,7 +529,7 @@ const tsOf=m=>CAL.basis==='taken'?(m.taken||m.added):m.added;
 const SEL={on:false,ids:new Set(),view:null};
 const urlCache=new Map();
 let ICONS=new Map();const iconUrlCache=new Map();
-const LIB={mode:'browse',g:'',sec:'',sub:'',kind:'all',sort:'new'};
+const LIB={mode:'browse',g:'',sec:'',b:'',s:'',kind:'all',sort:'new'};
 let THEME='auto';
 function thumbURL(m){if(!m||!m.thumb)return null;let u=urlCache.get(m.id);if(!u){u=URL.createObjectURL(m.thumb);urlCache.set(m.id,u)}return u;}
 function dropURL(id){const u=urlCache.get(id);if(u){URL.revokeObjectURL(u);urlCache.delete(id)}}
@@ -605,12 +656,12 @@ function renderHome(){
   </div>
   <div class="panel">
     <div class="sec-h" style="margin-bottom:12px"><h2>グループから見る</h2><span class="eyebrow">GROUPS</span>${groups.length?`<button class="more" data-go="library">すべて見る ›</button>`:''}</div>
-    ${groups.length?`<div class="icogrid">${groups.map(g=>`<div class="icard" role="button" tabindex="0" data-act="open-group" data-id="${g.id}">${iconHTML('g:'+g.id,g.name)}<b>${esc(g.name)}</b><small>${count(g)}件</small></div>`).join('')}</div>`
+    ${groups.length?`<div class="boards">${groups.map(g=>boardCardHTML('g:'+g.id,g.name,g.emoji,boardList('G:'+g.id),`data-act="open-group" data-id="${g.id}"`,{layout:'big',meta:`写真 ${count(g)}件・メンバー ${membersOf(g.id).length}人`})).join('')}</div>`
     :emptyHTML('users','c-sky','まずはグループを登録','推しのグループとメンバーを登録すると、写真をグループ全体・個人・ケミで整理できます。','<button class="btn primary" data-act="new-group">'+ic('plus')+'グループを追加</button> <button class="btn" data-act="go-room-groups">プリセットから選ぶ</button>')}
   </div>
   <div class="panel">
     <div class="sec-h" style="margin-bottom:12px"><h2>☆ お気に入り</h2><span class="eyebrow">MY COLLECTION</span>${favList.length?`<button class="more" data-go="collection">すべて見る（${favList.length}） ›</button>`:''}</div>
-    ${recent.length?`<div class="grid" data-view="home">${recent.map(tileHTML).join('')}</div>`:(all.length?emptyHTML('star','c-pink','☆を付けた写真がここに並びます','写真の☆をタップすると、ホームのお気に入りに表示されます。','<button class="btn primary" data-go="library">ライブラリを開く</button>'):emptyHTML('image','c-pink','まだ写真がありません','「まとめて追加」から、写真や動画を何枚でも一度に保存できます。','<button class="btn primary" data-go="add">'+ic('plus')+'写真・動画を追加</button>'))}
+    ${recent.length?`<div class="masonry" data-view="home">${recent.map(tileHTML).join('')}</div>`:(all.length?emptyHTML('star','c-pink','☆を付けた写真がここに並びます','写真の☆をタップすると、ホームのお気に入りに表示されます。','<button class="btn primary" data-go="library">ライブラリを開く</button>'):emptyHTML('image','c-pink','まだ写真がありません','「まとめて追加」から、写真や動画を何枚でも一度に保存できます。','<button class="btn primary" data-go="add">'+ic('plus')+'写真・動画を追加</button>'))}
   </div>`;
   hydrate($('#v-home'));
 }
@@ -697,7 +748,7 @@ function renderGridView(view){
   else body=`<div class="resline"><span><b>${list.length}</b> 件</span>
      <span class="sp"><button class="btn sm ${SEL.on?'primary':''}" data-act="toggle-select">${ic('select')}${SEL.on?'選択を終了':'選択'}</button>
      <label class="muted" for="${view}-sort" style="font-size:12px">並び順</label><select id="${view}-sort" data-f="sort">${opt('new','新しい順',f.sort)}${opt('old','古い順',f.sort)}</select></span></div>
-     <div class="grid ${SEL.on?'selecting':''}" data-view="${view}">${shown.map(tileHTML).join('')}</div>
+     <div class="masonry ${SEL.on?'selecting':''}" data-view="${view}">${shown.map(tileHTML).join('')}</div>
      ${list.length>shown.length?`<div style="text-align:center"><button class="btn" data-act="more" data-view="${view}">もっと見る（残り${list.length-shown.length}件）</button></div>`:''}`;
   root.innerHTML=head+filterHTML(view)+groupStripHTML(view)+body;
   root.dataset.view=view;hydrate(root);
@@ -729,6 +780,7 @@ function scopeList(key){
   else if(t==='gs')l=all.filter(m=>inG(m)&&m.cat===sec);
   else if(t==='m')l=all.filter(m=>(m.memberIds||[]).includes(id));
   else if(t==='c')l=all.filter(m=>m.chemiId===id);
+  else if(t==='s')l=all.filter(m=>m.sub===id);
   return l.sort((a,b)=>b.added-a.added);
 }
 function iconURL(key){
@@ -766,98 +818,184 @@ function openIconModal(key,title){
     const a=e.target.closest('[data-a]')?.dataset.a;if(a==='close')closeModal();if(a==='clear'){await setIcon(key,null);closeModal();toast('アイコンの設定を外しました')}});
 }
 
-/* ---------- library: browse by group ---------- */
-const SECS=[['group','グループ全体','users'],['member','個人','user'],['chemi','ケミ','chemi']];
+/* ---------- library: Pinterest-style boards ---------- */
+function boardList(key){
+  const [t,id]=key.split(':');const all=[...MEDIA.values()];let l=[];
+  if(t==='G')l=all.filter(m=>(m.groupIds||[]).includes(id));
+  else if(t==='g')l=all.filter(m=>m.cat==='group'&&(m.groupIds||[]).includes(id));
+  else if(t==='m')l=all.filter(m=>m.cat==='member'&&m.memberIds?.[0]===id);
+  else if(t==='c')l=all.filter(m=>m.chemiId===id);
+  else if(t==='s')l=all.filter(m=>m.sub===id);
+  return l.sort((a,b)=>b.added-a.added);
+}
+const subsOf=owner=>CAT.subs.filter(x=>x.owner===owner);
+function relTime(ts){if(!ts)return '';const d=Math.floor((Date.now()-ts)/86400000);if(d<1)return '今日';if(d<2)return '昨日';if(d<30)return d+'日前';if(d<365)return Math.floor(d/30)+'か月前';return Math.floor(d/365)+'年前';}
+function coverURLs(key,list,n){const urls=[];if(ICONS.has(key))urls.push(iconURL(key));for(const m of list){if(urls.length>=n)break;if(!m.thumb)continue;const u=thumbURL(m);if(!urls.includes(u))urls.push(u);}return urls;}
+function boardCardHTML(key,title,emoji,list,attrs,{layout='big',meta='',edit=false}={}){
+  const urls=coverURLs(key.startsWith('G:')?'g:'+key.slice(2):key,list,3);
+  const init=esc(String(title||'?').replace(/\s+/g,'').slice(0,2).toUpperCase());
+  const slots=[0,1,2].map(i=>`<span>${urls[i]?`<img src="${urls[i]}" alt="" loading="lazy">`:(i===0&&!urls.length?init:'')}</span>`).join('');
+  const last=list[0]?.added;
+  return `<div class="board" role="button" tabindex="0" ${attrs}>${edit?`<button class="edit" data-icon="${esc(key)}" data-title="${esc(title)}" aria-label="${esc(title)}の表紙を変更">${ic('camera')}</button>`:''}
+    <div class="collage ${layout}">${slots}</div><h4>${esc(title)}${emoji?' '+esc(emoji):''}</h4><small>${meta||`写真 ${list.length}件`}${last?`・${relTime(last)}`:''}</small></div>`;
+}
+function addBoardHTML(label,attrs,layout='big'){return `<div class="board" role="button" tabindex="0" ${attrs}><div class="collage add ${layout}">${ic('plus')}</div><h4>${label}</h4><small>&nbsp;</small></div>`;}
+function heroHTML(key,title,emoji,meta,desc,editAttrs){
+  const u=iconURL(key);
+  return `<div class="bhero"><div class="cover">${u?`<img src="${u}" alt="">`:esc(String(title).replace(/\s+/g,'').slice(0,2).toUpperCase())}
+     <div class="acts"><button data-icon="${esc(key)}" data-title="${esc(title)}" aria-label="表紙を変更">${ic('camera')}</button><button ${editAttrs} aria-label="編集">${ic('edit')}</button></div></div>
+    <h1>${esc(title)}${emoji?`<span class="emo">${esc(emoji)}</span>`:''}</h1><div class="meta">${meta}</div>
+    ${desc?`<p class="desc clamp" id="bdesc">${esc(desc)}</p>${desc.length>60||desc.includes('\n')?`<button class="more-desc" data-moredesc="1">さらに表示</button>`:''}`:''}</div>`;
+}
+function masonryBlock(list,title,addAttrs){
+  const kindCount=k=>list.filter(m=>k==='all'||m.kind===k).length;
+  const l=list.filter(m=>LIB.kind==='all'||m.kind===LIB.kind).sort((a,b)=>LIB.sort==='old'?a.added-b.added:b.added-a.added);
+  LAST.library=l.map(m=>m.id);const shown=l.slice(0,SHOWN.library);
+  return `<div class="bsec"><div class="bsec-h"><h3>${title}</h3><span>${list.length}件</span></div>
+    ${list.length?`<div class="resline"><div class="seg" role="group" aria-label="種類">${[['all','すべて'],['photo','写真'],['video','動画']].map(([v,lb])=>`<button class="${LIB.kind===v?'on':''}" data-libkind="${v}">${lb} ${kindCount(v)}</button>`).join('')}</div>
+     <span class="sp"><button class="btn sm ${SEL.on?'primary':''}" data-act="toggle-select">${ic('select')}${SEL.on?'選択を終了':'選択'}</button>
+     <select id="browse-sort" aria-label="並び順">${opt('new','新しい順',LIB.sort)}${opt('old','古い順',LIB.sort)}</select></span></div>
+    <div class="masonry nocat ${SEL.on?'selecting':''}" data-view="library">${shown.map(tileHTML).join('')}</div>
+    ${l.length>shown.length?`<div style="text-align:center"><button class="btn" data-libmore="1">もっと見る（残り${l.length-shown.length}件）</button></div>`:''}`
+    :`<div class="panel">${emptyHTML('image','c-pink','まだ写真がありません','ここに入れたい写真をまとめて追加できます。',`<button class="btn primary" ${addAttrs}>${ic('plus')}ここに追加</button>`)}</div>`}</div>`;
+}
+function subBoardsBlock(owner,title){
+  const subs=subsOf(owner);
+  return `<div class="bsec"><div class="bsec-h"><h3>${title}</h3><span>${subs.length}</span></div>
+    <div class="boards">${subs.map(x=>boardCardHTML('s:'+x.id,x.name,x.emoji,boardList('s:'+x.id),`data-libs="${x.id}"`,{layout:'strip'})).join('')}
+    ${addBoardHTML('サブボードを作る',`data-newsub="${owner}"`,'strip')}</div></div>`;
+}
+function curOwner(){if(LIB.s)return S.get(LIB.s)?.owner||'';if(LIB.b)return LIB.b;return LIB.g&&LIB.sec==='group'?'g:'+LIB.g:'';}
 function libNav(patch){Object.assign(LIB,patch);SHOWN.library=120;if(SEL.on)endSelect();try{history.pushState({lib:{...LIB}},'','#library')}catch(e){}renderLibrary();window.scrollTo({top:0});}
-window.addEventListener('popstate',e=>{if(VIEW!=='library')return;const st=e.state&&e.state.lib;Object.assign(LIB,st||{g:'',sec:'',sub:''});if(!st)LIB.mode='browse';if(SEL.on)endSelect();renderLibrary();});
+window.addEventListener('popstate',e=>{if(VIEW!=='library')return;const st=e.state&&e.state.lib;Object.assign(LIB,st||{g:'',sec:'',b:'',s:''});if(!st)LIB.mode='browse';if(SEL.on)endSelect();renderLibrary();});
 function libHeadHTML(){
   return `<div class="libmode"><div><div class="eyebrow">LIBRARY</div><h2 style="font-size:18px">ライブラリ</h2></div>
-   <div class="seg" style="margin-left:auto" role="group" aria-label="見かた"><button class="${LIB.mode==='browse'?'on':''}" data-libmode="browse">グループから</button><button class="${LIB.mode==='search'?'on':''}" data-libmode="search">${ic('search')} 条件で探す</button></div></div>`;
+   <div class="seg" style="margin-left:auto" role="group" aria-label="見かた"><button class="${LIB.mode==='browse'?'on':''}" data-libmode="browse">ボード</button><button class="${LIB.mode==='search'?'on':''}" data-libmode="search">${ic('search')} 条件で探す</button></div></div>`;
 }
+const SECS=[['group','グループ','users'],['member','個人','user'],['chemi','ケミ','chemi']];
+function secList(gid,sec){const all=[...MEDIA.values()].filter(m=>(m.groupIds||[]).includes(gid));return all.filter(m=>m.cat===sec).sort((a,b)=>b.added-a.added);}
 function renderLibrary(){
   if(LIB.mode==='search'){renderGridView('library');return;}
-  const root=$('#v-library');const all=[...MEDIA.values()];
-  if(LIB.g&&!G.get(LIB.g)){LIB.g='';LIB.sec='';LIB.sub=''}
-  const g=G.get(LIB.g);
-  const editBtn=(key,title)=>`<button class="edit" data-icon="${esc(key)}" data-title="${esc(title)}" aria-label="${esc(title)}のアイコンを変更">${ic('camera')}</button>`;
-  const card=(key,title,count,attrs,opts={})=>`<div class="icard" role="button" tabindex="0" ${attrs}>${editBtn(key,title)}${iconHTML(key,title,opts)}<b>${esc(title)}</b><small>${count}件</small></div>`;
-  const crumbs=[];
-  let body='';
+  const root=$('#v-library');
+  if(LIB.g&&!G.get(LIB.g))Object.assign(LIB,{g:'',sec:'',b:'',s:''});
+  if(LIB.b&&!ownerExists(LIB.b))LIB.b='';
+  if(LIB.s&&!S.get(LIB.s))LIB.s='';
+  const g=G.get(LIB.g);const crumbs=[];let body='';
   if(!g){
     const groups=sortedGroups();
-    const cnt=gid=>all.filter(m=>(m.groupIds||[]).includes(gid)).length;
-    body=`<div class="panel" style="display:flex;flex-direction:column;gap:16px">
-      <div class="sec-h"><h2 style="font-size:16px">グループ</h2><span class="muted" style="font-size:12.5px">アイコンの ${ic('camera')} で画像を変えられます</span></div>
-      ${groups.length?`<div class="icogrid">${groups.map(x=>card('g:'+x.id,x.name,cnt(x.id),`data-libg="${x.id}"`)).join('')}
-        <div class="icard" role="button" tabindex="0" data-act="new-group"><span class="ico add">${ic('plus')}</span><b>グループを追加</b></div></div>`
-      :emptyHTML('users','c-sky','まずはグループを登録','グループを登録すると、ここにアイコンで並びます。','<button class="btn primary" data-act="new-group">'+ic('plus')+'グループを追加</button> <button class="btn" data-act="go-room-groups">プリセットから選ぶ</button>')}
-    </div>`;
+    body=`<div class="bsec"><div class="bsec-h"><h3>グループ</h3><span>${groups.length}</span><span style="margin-left:auto">${ic('camera')} で表紙を変更</span></div>
+      ${groups.length?`<div class="boards">${groups.map(x=>{const l=boardList('G:'+x.id);return boardCardHTML('g:'+x.id,x.name,x.emoji,l,`data-libg="${x.id}"`,{meta:`写真 ${l.length}件・メンバー ${membersOf(x.id).length}人`,edit:true})}).join('')}${addBoardHTML('グループを追加','data-act="new-group"')}</div>`
+      :`<div class="panel">${emptyHTML('users','c-sky','まずはグループを登録','グループを登録すると、ここにボードとして並びます。','<button class="btn primary" data-act="new-group">'+ic('plus')+'グループを追加</button> <button class="btn" data-act="go-room-groups">プリセットから選ぶ</button>')}</div>`}</div>`;
   }else{
     crumbs.push(`<button data-crumb="root">ライブラリ</button>`);
-    const inG=m=>(m.groupIds||[]).includes(g.id);
+    const secLabel=SECS.find(x=>x[0]===LIB.sec)?.[1]||'';
+    const sub=LIB.s?S.get(LIB.s):null;
+    const board=LIB.b?ownerInfo(LIB.b):null;
     if(!LIB.sec){
       crumbs.push(`<b>${esc(g.name)}</b>`);
-      const secCount=sec=>all.filter(m=>inG(m)&&m.cat===sec).length;
-      body=`<div class="panel" style="display:flex;flex-direction:column;gap:20px">
-        <div class="ghead">${card('g:'+g.id,g.name,all.filter(inG).length,'data-noop="1"').replace(/<b>.*<\/small>/,'')}
-          <div class="info"><h3>${esc(g.name)}</h3><span>${esc(g.agency||'事務所未設定')} · ${genLabel(g.gen)} · ${membersOf(g.id).length}人</span>
-           <div class="btn-row"><button class="btn sm" data-act="edit-group" data-id="${g.id}">${ic('edit')}グループ情報を編集</button></div></div></div>
-        <div class="icogrid three">${SECS.map(([sec,label,icn])=>card(`gs:${g.id}:${sec}`,label,secCount(sec),`data-libsec="${sec}"`,{fallback:ic(icn)})).join('')}</div>
-      </div>`;
+      const total=boardList('G:'+g.id);const mem=membersOf(g.id),ch=CAT.chemis.filter(c=>chemiGroups(c).includes(g.id));
+      const meta={group:l=>`写真 ${l.length}件・サブボード ${subsOf('g:'+g.id).length}件`,member:l=>`${mem.length}人・写真 ${l.length}件`,chemi:l=>`${ch.length}組・写真 ${l.length}件`};
+      body=heroHTML('g:'+g.id,g.name,g.emoji,`${esc(g.agency||'事務所未設定')}・${genLabel(g.gen)}・写真 ${total.length}件・メンバー ${mem.length}人${total[0]?'・更新 '+relTime(total[0].added):''}`,g.desc,`data-act="edit-group" data-id="${g.id}"`)
+       +`<div class="bsec"><div class="bsec-h"><h3>見たいものを選ぶ</h3><span>${ic('camera')} で表紙を変更</span></div><div class="boards">${SECS.map(([sec,label])=>{const l=secList(g.id,sec);return boardCardHTML(`gs:${g.id}:${sec}`,label,'',l,`data-libsec="${sec}"`,{meta:meta[sec](l),edit:true})}).join('')}</div></div>`;
+    }else if(LIB.sec==='group'&&!sub){
+      crumbs.push(`<button data-crumb="group">${esc(g.name)}</button>`,`<b>${secLabel}</b>`);
+      body=`<div class="subhead"><div><div class="eyebrow">${esc(g.name)}</div><h2>グループ</h2></div></div>`+subBoardsBlock('g:'+g.id,'サブボード')+masonryBlock(boardList('g:'+g.id),'グループ全体の写真','data-libadd="1"');
+    }else if(LIB.sec!=='group'&&!board){
+      crumbs.push(`<button data-crumb="group">${esc(g.name)}</button>`,`<b>${secLabel}</b>`);
+      if(LIB.sec==='member'){const mem=membersOf(g.id);
+        body=`<div class="subhead"><div><div class="eyebrow">${esc(g.name)}</div><h2>個人</h2></div></div>
+         <div class="bsec"><div class="bsec-h"><h3>メンバー</h3><span>${mem.length}人</span><span style="margin-left:auto">${ic('camera')} で表紙を変更</span></div><div class="boards">${mem.map(x=>{const l=boardList('m:'+x.id);return boardCardHTML('m:'+x.id,x.name,x.emoji,l,`data-libb="m:${x.id}"`,{meta:`写真 ${l.length}件・サブボード ${subsOf('m:'+x.id).length}件`,edit:true})}).join('')}${addBoardHTML('メンバーを追加',`data-addmember="${g.id}"`)}</div></div>`;
+      }else{const ch=CAT.chemis.filter(c=>chemiGroups(c).includes(g.id));
+        body=`<div class="subhead"><div><div class="eyebrow">${esc(g.name)}</div><h2>ケミ</h2></div></div>
+         <div class="bsec"><div class="bsec-h"><h3>ケミ</h3><span>${ch.length}組</span><span style="margin-left:auto">${ic('camera')} で表紙を変更</span></div><div class="boards">${ch.map(c=>{const l=boardList('c:'+c.id);return boardCardHTML('c:'+c.id,c.name,c.emoji,l,`data-libb="c:${c.id}"`,{meta:`写真 ${l.length}件・サブボード ${subsOf('c:'+c.id).length}件`,edit:true})}).join('')}${addBoardHTML('ケミを作る',`data-addchemi="${g.id}"`)}</div></div>`;}
+    }else if(board&&!sub){
+      crumbs.push(`<button data-crumb="group">${esc(g.name)}</button>`,`<button data-crumb="sec">${secLabel}</button>`,`<b>${esc(board.name)}</b>`);
+      const l=boardList(LIB.b);const o=board.o;
+      body=heroHTML(LIB.b,board.name,o.emoji,`${secLabel}・写真 ${l.length}件・サブボード ${subsOf(LIB.b).length}件${l[0]?'・更新 '+relTime(l[0].added):''}`,o.desc,board.t==='m'?`data-editmember="${board.id}"`:`data-act="edit-chemi" data-id="${board.id}"`)
+       +subBoardsBlock(LIB.b,'サブボード')+masonryBlock(l,'すべての写真','data-libadd="1"');
     }else{
-      const secLabel=SECS.find(x=>x[0]===LIB.sec)?.[1]||'';
-      crumbs.push(`<button data-crumb="group">${esc(g.name)}</button>`);
-      let list=null,ph='';
-      if(LIB.sec==='group'){crumbs.push(`<b>${secLabel}</b>`);list=all.filter(m=>inG(m)&&m.cat==='group');ph=`<div class="phead">${iconHTML(`gs:${g.id}:group`,secLabel,{fallback:ic('users')})}<div><h3>${esc(g.name)} · グループ全体</h3><span>${list.length}件</span></div></div>`;}
-      else if(!LIB.sub){
-        crumbs.push(`<b>${secLabel}</b>`);
-        if(LIB.sec==='member'){const mem=membersOf(g.id);
-          body=`<div class="panel" style="display:flex;flex-direction:column;gap:16px"><div class="sec-h"><h2 style="font-size:16px">${esc(g.name)} · 個人</h2><span class="muted" style="font-size:12.5px">${mem.length}人</span></div>
-           <div class="icogrid">${mem.map(x=>card('m:'+x.id,x.name,all.filter(m=>m.cat==='member'&&m.memberIds?.[0]===x.id).length,`data-libsub="${x.id}"`,{round:true})).join('')}
-           <div class="icard" role="button" tabindex="0" data-addmember="${g.id}"><span class="ico round add">${ic('plus')}</span><b>メンバーを追加</b></div></div></div>`;}
-        else{const ch=CAT.chemis.filter(c=>chemiGroups(c).includes(g.id));
-          body=`<div class="panel" style="display:flex;flex-direction:column;gap:16px"><div class="sec-h"><h2 style="font-size:16px">${esc(g.name)} · ケミ</h2><span class="muted" style="font-size:12.5px">${ch.length}組</span></div>
-           <div class="icogrid">${ch.map(c=>card('c:'+c.id,c.name,all.filter(m=>m.chemiId===c.id).length,`data-libsub="${c.id}"`)).join('')}
-           <div class="icard" role="button" tabindex="0" data-addchemi="${g.id}"><span class="ico add">${ic('plus')}</span><b>ケミを作る</b></div></div></div>`;}
-      }else{
-        crumbs.push(`<button data-crumb="sec">${secLabel}</button>`);
-        if(LIB.sec==='member'){const mm=M.get(LIB.sub);crumbs.push(`<b>${esc(mm?.name||'')}</b>`);list=all.filter(m=>m.cat==='member'&&m.memberIds?.[0]===LIB.sub);ph=`<div class="phead">${iconHTML('m:'+LIB.sub,mm?.name,{round:true})}<div><h3>${esc(mm?.name||'')}</h3><span>${esc(g.name)} · 個人 · ${list.length}件</span></div></div>`;}
-        else{const c=C.get(LIB.sub);crumbs.push(`<b>${esc(c?.name||'')}</b>`);list=all.filter(m=>m.chemiId===LIB.sub);ph=`<div class="phead">${iconHTML('c:'+LIB.sub,c?.name)}<div><h3>${esc(c?.name||'')}</h3><span>ケミ · ${list.length}件</span></div></div>`;}
-      }
-      if(list){
-        const kindCount=k=>list.filter(m=>k==='all'||m.kind===k).length;
-        list=list.filter(m=>LIB.kind==='all'||m.kind===LIB.kind).sort((a,b)=>LIB.sort==='old'?a.added-b.added:b.added-a.added);
-        LAST.library=list.map(m=>m.id);const shown=list.slice(0,SHOWN.library);
-        body=`<div class="panel" style="display:flex;flex-direction:column;gap:14px">${ph}
-          <div class="resline"><div class="seg" role="group" aria-label="種類">${[['all','すべて'],['photo','写真'],['video','動画']].map(([v,l])=>`<button class="${LIB.kind===v?'on':''}" data-libkind="${v}">${l} ${kindCount(v)}</button>`).join('')}</div>
-           <span class="sp"><button class="btn sm ${SEL.on?'primary':''}" data-act="toggle-select">${ic('select')}${SEL.on?'選択を終了':'選択'}</button>
-           <select id="browse-sort" aria-label="並び順">${opt('new','新しい順',LIB.sort)}${opt('old','古い順',LIB.sort)}</select></span></div>
-          ${list.length?`<div class="grid ${SEL.on?'selecting':''}" data-view="library">${shown.map(tileHTML).join('')}</div>
-          ${list.length>shown.length?`<div style="text-align:center"><button class="btn" data-libmore="1">もっと見る（残り${list.length-shown.length}件）</button></div>`:''}`
-          :emptyHTML('image','c-pink','まだ写真がありません','「追加」で分類をここに合わせて保存すると表示されます。','<button class="btn primary" data-libadd="1">'+ic('plus')+'ここに追加</button>')}
-        </div>`;
-      }
+      const own=ownerInfo(sub.owner);
+      crumbs.push(`<button data-crumb="group">${esc(g.name)}</button>`,`<button data-crumb="sec">${secLabel}</button>`);
+      if(own&&own.t!=='g')crumbs.push(`<button data-crumb="board">${esc(own.name)}</button>`);
+      crumbs.push(`<b>${esc(sub.name)}</b>`);
+      const l=boardList('s:'+sub.id);
+      body=`<div class="subhead"><div><div class="eyebrow">${esc(own?.name||'')} のサブボード</div><h2>${esc(sub.name)}${sub.emoji?' '+esc(sub.emoji):''}</h2><div class="muted" style="font-size:12.5px">写真 ${l.length}件${l[0]?'・更新 '+relTime(l[0].added):''}</div></div>
+        <button class="btn sm" data-editsub="${sub.id}">${ic('edit')}編集</button></div>`+masonryBlock(l,'写真','data-libadd="1"');
     }
   }
-  root.innerHTML=libHeadHTML()+(crumbs.length?`<nav class="crumbs" aria-label="現在の場所">${crumbs.join('<span>›</span>')}</nav>`:'')+body;
+  root.innerHTML=libHeadHTML()+(crumbs.length?`<nav class="crumbs" aria-label="現在の場所">${crumbs.join('<span>›</span>')}</nav>`:'')+`<div class="bview">${body}</div>`;
   hydrate(root);
+}
+function libAddPrefill(){
+  const own=ownerInfo(curOwner());const st=ADD.st;st.sub=LIB.s||'';
+  if(!own||(LIB.sec==='group'&&!LIB.s)){Object.assign(st,{cat:'group',group:LIB.g,member:'',chemi:''});}
+  else if(own.t==='g')Object.assign(st,{cat:'group',group:own.id,member:'',chemi:''});
+  else if(own.t==='m')Object.assign(st,{cat:'member',group:own.o.groupId,member:own.id,chemi:''});
+  else Object.assign(st,{cat:'chemi',group:LIB.g,member:'',chemi:own.id});
+  go('add');
 }
 $('#v-library').addEventListener('click',e=>{
   if(LIB.mode==='search'&&!e.target.closest('[data-libmode]'))return;
   const ed=e.target.closest('[data-icon]');if(ed){e.stopPropagation();openIconModal(ed.dataset.icon,ed.dataset.title);return;}
   const md=e.target.closest('[data-libmode]');if(md){LIB.mode=md.dataset.libmode;if(SEL.on)endSelect();renderLibrary();return;}
-  const cr=e.target.closest('[data-crumb]');if(cr){const c=cr.dataset.crumb;libNav(c==='root'?{g:'',sec:'',sub:''}:c==='group'?{sec:'',sub:''}:{sub:''});return;}
-  const gg=e.target.closest('[data-libg]');if(gg){libNav({g:gg.dataset.libg,sec:'',sub:''});return;}
-  const sc=e.target.closest('[data-libsec]');if(sc){libNav({sec:sc.dataset.libsec,sub:'',kind:'all'});return;}
-  const sb=e.target.closest('[data-libsub]');if(sb){libNav({sub:sb.dataset.libsub,kind:'all'});return;}
+  if(e.target.closest('[data-moredesc]')){const d=$('#bdesc');d.classList.toggle('clamp');e.target.textContent=d.classList.contains('clamp')?'さらに表示':'閉じる';return;}
+  const cr=e.target.closest('[data-crumb]');if(cr){const c=cr.dataset.crumb;libNav(c==='root'?{g:'',sec:'',b:'',s:''}:c==='group'?{sec:'',b:'',s:''}:c==='sec'?{b:'',s:''}:{s:''});return;}
+  const gg=e.target.closest('[data-libg]');if(gg){libNav({g:gg.dataset.libg,sec:'',b:'',s:'',kind:'all'});return;}
+  const sc=e.target.closest('[data-libsec]');if(sc){libNav({sec:sc.dataset.libsec,b:'',s:'',kind:'all'});return;}
+  const bb=e.target.closest('[data-libb]');if(bb){libNav({b:bb.dataset.libb,s:'',kind:'all'});return;}
+  const ss=e.target.closest('[data-libs]');if(ss){libNav({s:ss.dataset.libs,kind:'all'});return;}
   const k=e.target.closest('[data-libkind]');if(k){LIB.kind=k.dataset.libkind;renderLibrary();return;}
   if(e.target.closest('[data-libmore]')){SHOWN.library+=120;renderLibrary();return;}
   const am=e.target.closest('[data-addmember]');if(am){openMemberQuick(am.dataset.addmember);return;}
   const ac=e.target.closest('[data-addchemi]');if(ac){openChemiModal(null,null,ac.dataset.addchemi);return;}
-  if(e.target.closest('[data-libadd]')){Object.assign(ADD.st,{cat:LIB.sec,group:LIB.sec==='chemi'?LIB.g:LIB.g,member:LIB.sec==='member'?LIB.sub:'',chemi:LIB.sec==='chemi'?LIB.sub:''});go('add');return;}
+  const em=e.target.closest('[data-editmember]');if(em){openMemberModal(em.dataset.editmember);return;}
+  const ns=e.target.closest('[data-newsub]');if(ns){openSubModal(ns.dataset.newsub,null);return;}
+  const es=e.target.closest('[data-editsub]');if(es){const x=S.get(es.dataset.editsub);if(x)openSubModal(x.owner,x.id);return;}
+  if(e.target.closest('[data-libadd]')){libAddPrefill();return;}
 });
 $('#v-library').addEventListener('change',e=>{if(e.target.id==='browse-sort'){LIB.sort=e.target.value;renderLibrary();}});
-document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches?.('.icard[role=button]')){e.preventDefault();e.target.click();}});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches?.('.icard[role=button],.board[role=button]')){e.preventDefault();e.target.click();}});
+
+/* sub-boards */
+function openSubModal(owner,sid,done){
+  const x=sid?S.get(sid):null;const own=ownerInfo(owner);
+  const m=openModal(`<h3>${x?'サブボードを編集':'サブボードを作る'}</h3>
+   <p class="note" style="margin:0">${esc(own?.name||'')} の中に作るフォルダです。カムバ期・SNS・ステージなど自由に分けられます。</p>
+   <div class="row" style="align-items:flex-end"><div class="field" style="flex:1"><label for="sb-name">名前</label><input type="text" id="sb-name" value="${esc(x?.name||'')}" placeholder="例：ICONIC HEART、INSTAGRAM、STAGE"></div>
+   <div class="field" style="width:84px;flex:none"><label for="sb-emoji">絵文字</label><input type="text" id="sb-emoji" maxlength="4" value="${esc(x?.emoji||'')}" placeholder="🎀"></div></div>
+   <div class="acts">${x?`<button class="btn danger" data-a="del" style="margin-right:auto">削除</button>`:''}<button class="btn" data-a="c">キャンセル</button><button class="btn primary" data-a="s">保存</button></div>`);
+  m.addEventListener('click',async e=>{const a=e.target.closest('[data-a]')?.dataset.a;if(!a)return;if(a==='c'){closeModal();return;}
+    if(a==='del'){if(!await confirmBox(`${x.name}を削除しますか？`,'中の写真は消えず、元のボードに残ります。','削除する'))return;
+      CAT.subs=CAT.subs.filter(y=>y.id!==x.id);const ch=[...MEDIA.values()].filter(md=>md.sub===x.id);ch.forEach(md=>md.sub=null);await putMediaMany(ch);await saveCat();closeModal();if(LIB.s===x.id)LIB.s='';refresh();return;}
+    const name=$('#sb-name',m).value.trim();if(!name){toast('名前を入力してください');return;}
+    const emoji=$('#sb-emoji',m).value.trim();let t=x;
+    if(x)Object.assign(x,{name,emoji});else{t={id:uid(),owner,name,emoji};CAT.subs.push(t)}
+    await saveCat();closeModal();toast(x?'保存しました':`サブボード「${name}」を作りました`);done?done(t):refresh();});
+}
+function openMoveToSub(ids){
+  const owner=curOwner();const own=ownerInfo(owner);
+  if(!own){toast('グループかメンバーのボードを開いてから使えます');return;}
+  const subs=subsOf(owner);
+  const m=openModal(`<h3>${ids.length}件をサブボードへ</h3><p class="note" style="margin:0">${esc(own.name)} のサブボードから選びます。</p>
+   <div class="chips">${subs.map(x=>`<button class="chip" data-to="${x.id}">${esc(x.name)}${x.emoji?' '+esc(x.emoji):''}</button>`).join('')||'<span class="note">まだサブボードがありません</span>'}</div>
+   <div class="acts"><button class="btn ghost" data-to="" style="margin-right:auto">サブボードから外す</button><button class="btn" data-a="new">${ic('plus')}新しく作る</button><button class="btn" data-a="c">閉じる</button></div>`);
+  const apply=async sid=>{const list=ids.map(id=>MEDIA.get(id)).filter(Boolean);list.forEach(md=>md.sub=sid||null);await putMediaMany(list);closeModal();toast(sid?`${list.length}件を「${S.get(sid)?.name}」に入れました`:`${list.length}件をサブボードから外しました`);refresh();};
+  m.addEventListener('click',e=>{const t=e.target.closest('[data-to]');if(t){apply(t.dataset.to);return;}const a=e.target.closest('[data-a]')?.dataset.a;if(a==='c')closeModal();if(a==='new'){closeModal();openSubModal(owner,null,x=>apply(x.id));}});
+}
+function openMemberModal(mid){
+  const x=M.get(mid);if(!x)return;
+  const m=openModal(`<h3>メンバーを編集</h3><div class="form-grid">
+   <div class="row" style="align-items:flex-end"><div class="field" style="flex:1"><label for="mm-name">名前</label><input type="text" id="mm-name" value="${esc(x.name)}"></div>
+   <div class="field" style="width:84px;flex:none"><label for="mm-emoji">絵文字</label><input type="text" id="mm-emoji" maxlength="4" value="${esc(x.emoji||'')}" placeholder="🍓"></div></div>
+   <div class="field"><label for="mm-desc">プロフィール</label><textarea id="mm-desc" placeholder="例：本名・誕生日・ポジション・MBTIなど">${esc(x.desc||'')}</textarea></div></div>
+   <div class="acts"><button class="btn danger" data-a="del" style="margin-right:auto">削除</button><button class="btn" data-a="c">キャンセル</button><button class="btn primary" data-a="s">保存</button></div>`);
+  m.addEventListener('click',async e=>{const a=e.target.closest('[data-a]')?.dataset.a;if(!a)return;if(a==='c'){closeModal();return;}
+    if(a==='del'){if(!await confirmBox(`${x.name}を削除しますか？`,'写真は残りますが、このメンバーの紐づけとサブボードは外れます。','削除する'))return;
+      CAT.members=CAT.members.filter(y=>y.id!==mid);CAT.chemis.forEach(c=>c.memberIds=c.memberIds.filter(y=>y!==mid));CAT.chemis=CAT.chemis.filter(c=>c.memberIds.length>=2);
+      await saveCat();closeModal();if(LIB.b==='m:'+mid)Object.assign(LIB,{b:'',s:''});refresh();return;}
+    const name=$('#mm-name',m).value.trim();if(!name){toast('名前を入力してください');return;}
+    Object.assign(x,{name,emoji:$('#mm-emoji',m).value.trim(),desc:$('#mm-desc',m).value.trim()});await saveCat();closeModal();toast('保存しました');refresh();});
+}
 
 /* ---------- theme ---------- */
 function applyTheme(){const r=document.documentElement;
@@ -878,6 +1016,7 @@ function drawSelbar(){if(!SEL.on){$('#selbar-root').innerHTML='';return;}
    <button data-sel="all">${ic('select')}全選択</button>
    <button data-sel="fav">${ic('star')}☆追加</button>
    <button data-sel="unfav">${ic('star')}☆解除</button>
+   ${SEL.view==='library'&&LIB.mode==='browse'&&curOwner()?`<button data-sel="sub">${ic('grid')}サブボードへ</button>`:''}
    <button data-sel="edit">${ic('edit')}分類変更</button>
    <button data-sel="down">${ic('down')}保存</button>
    <button data-sel="del">${ic('trash')}削除</button>
@@ -888,6 +1027,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-sel]
   if(!ids.length){toast('写真をタップして選んでください');return;}
   if(a==='fav'||a==='unfav'){const list=ids.map(id=>MEDIA.get(id)).filter(Boolean);list.forEach(m=>{m.fav=a==='fav';m.favAt=Date.now()});await putMediaMany(list);toast(a==='fav'?`${list.length}件を☆に追加しました`:`${list.length}件の☆を外しました`);refresh();drawSelbar();}
   if(a==='edit')openEdit(ids);
+  if(a==='sub')openMoveToSub(ids);
   if(a==='down')downloadMany(ids);
   if(a==='del'){if(await confirmBox(`${ids.length}件を削除しますか？`,'この端末のライブラリから完全に削除されます。元に戻せません。','削除する'))await removeMedia(ids);}
 });
@@ -927,20 +1067,25 @@ function mountTagForm(root,st,{multi=false,prefix='tf'}={}){
      ${st.cat==='chemi'?`<div class="field"><label for="${prefix}-chemi">ケミ</label>
        <div class="row"><select id="${prefix}-chemi" data-t="chemi">${opt('',chemis.length?'ケミを選ぶ':'ケミが未登録です',st.chemi)}${chemis.map(c=>opt(c.id,c.name,st.chemi)).join('')}</select>
        <button type="button" class="btn sm" data-tnew="chemi">＋新規</button></div></div>`:''}`:''}
+     ${st.cat!=='keep'&&tagOwner(st)?(()=>{const subs=subsOf(tagOwner(st));return `<div class="field"><label for="${prefix}-sub">サブボード（任意）</label>
+       <div class="row"><select id="${prefix}-sub" data-t="sub">${opt('','入れない',st.sub)}${subs.map(x=>opt(x.id,x.name+(x.emoji?' '+x.emoji:''),st.sub)).join('')}</select>
+       <button type="button" class="btn sm" data-tnew="sub">＋新規</button></div></div>`})():''}
      <div class="field"><label for="${prefix}-tags">${multi?'追加するタグ':'タグ'}（カンマ区切り）</label><input type="text" id="${prefix}-tags" data-t="tags" placeholder="例：音楽番組, 空港, 私服, 2026" value="${esc(st.tags)}"></div>
      <div class="field"><label for="${prefix}-memo">メモ</label><input type="text" id="${prefix}-memo" data-t="memo" placeholder="${multi?'入力すると選択中すべてに上書き':'イベント名・日付など'}" value="${esc(st.memo)}"></div>
     </div>`;
   };
-  root.addEventListener('click',e=>{const c=e.target.closest('[data-tcat]');if(c){st.cat=c.dataset.tcat;draw();return;}
+  root.addEventListener('click',e=>{const c=e.target.closest('[data-tcat]');if(c){st.cat=c.dataset.tcat;if(st.sub&&S.get(st.sub)?.owner!==tagOwner(st))st.sub='';draw();return;}
     const n=e.target.closest('[data-tnew]');if(!n)return;const k=n.dataset.tnew;
     if(k==='group')openGroupModal(null,g=>{st.group=g.id;st.member='';draw()});
     if(k==='member')openMemberQuick(st.group,m=>{st.member=m.id;draw()});
     if(k==='chemi')openChemiModal(null,c=>{st.chemi=c.id;draw()},st.group);
+    if(k==='sub'){const o=tagOwner(st);if(o)openSubModal(o,null,x=>{st.sub=x.id;draw()});}
   });
-  root.addEventListener('change',e=>{const k=e.target.dataset.t;if(!k||k==='tags'||k==='memo')return;st[k]=e.target.value;if(k==='group'){st.member='';if(st.chemi&&st.group&&!chemiGroups(C.get(st.chemi)||{memberIds:[]}).includes(st.group))st.chemi=''}draw();});
+  root.addEventListener('change',e=>{const k=e.target.dataset.t;if(!k||k==='tags'||k==='memo')return;st[k]=e.target.value;if(k!=='sub'){const o=tagOwner(st);if(st.sub&&(!o||S.get(st.sub)?.owner!==o))st.sub='';}if(k==='group'){st.member='';if(st.chemi&&st.group&&!chemiGroups(C.get(st.chemi)||{memberIds:[]}).includes(st.group))st.chemi=''}draw();});
   root.addEventListener('input',e=>{const k=e.target.dataset.t;if(k==='tags'||k==='memo')st[k]=e.target.value;});
   draw();return {draw};
 }
+function tagOwner(st){if(st.cat==='group'&&st.group)return 'g:'+st.group;if(st.cat==='member'&&st.member)return 'm:'+st.member;if(st.cat==='chemi'&&st.chemi)return 'c:'+st.chemi;return '';}
 function validateTag(st){
   if(st.cat==='keep')return null;
   if(st.cat==='group'&&!st.group)return 'グループを選んでください';
@@ -953,7 +1098,8 @@ function applyTag(m,st,multi){
   if(st.cat!=='keep'){m.cat=st.cat;
     if(st.cat==='group'){m.groupIds=[st.group];m.memberIds=[];m.chemiId=null}
     if(st.cat==='member'){m.groupIds=[st.group];m.memberIds=[st.member];m.chemiId=null}
-    if(st.cat==='chemi'){const c=C.get(st.chemi);m.chemiId=c.id;m.memberIds=[...c.memberIds];m.groupIds=chemiGroups(c)}}
+    if(st.cat==='chemi'){const c=C.get(st.chemi);m.chemiId=c.id;m.memberIds=[...c.memberIds];m.groupIds=chemiGroups(c)}
+    const o=tagOwner(st);m.sub=st.sub&&S.get(st.sub)?.owner===o?st.sub:null;}
   const tags=splitTags(st.tags);
   m.tags=multi?[...new Set([...(m.tags||[]),...tags])]:tags;
   if(!multi||st.memo.trim())m.memo=st.memo.trim();
@@ -973,6 +1119,8 @@ function openGroupModal(gid,done){
     </div>
     <div class="field"><span class="flabel">テーマカラー</span><div class="swatches" id="gm-sw">${COLORS.map(c=>`<button type="button" data-c="${c}" class="${c===st.color?'on':''}" style="background:${c}" aria-label="色 ${c}"></button>`).join('')}</div></div>
     ${g?`<div class="field"><span class="flabel">メンバー</span><div class="chips" id="gm-members">${membersOf(g.id).map(mm=>`<span class="chip">${esc(mm.name)}<button type="button" class="x" data-delmem="${mm.id}" aria-label="${esc(mm.name)}を削除">×</button></span>`).join('')||'<span class="note">未登録</span>'}</div></div>`:''}
+    <div class="field"><label for="gm-emoji">絵文字（ボード名の横に表示）</label><input type="text" id="gm-emoji" maxlength="4" value="${esc(g?.emoji||'')}" placeholder="💙" style="max-width:120px"></div>
+    <div class="field"><label for="gm-desc">紹介文</label><textarea id="gm-desc" placeholder="デビュー日・ファンダム名・メモなど">${esc(g?.desc||'')}</textarea></div>
     <div class="field"><label for="gm-add">${g?'メンバーを追加':'メンバー'}（改行・カンマ区切りでまとめて登録）</label><textarea id="gm-add" placeholder="例：S.COUPS, JEONGHAN, JOSHUA"></textarea></div>
    </div>
    <div class="acts">${g?`<button class="btn danger" data-a="del" style="margin-right:auto">削除</button>`:''}<button class="btn" data-a="cancel">キャンセル</button><button class="btn primary" data-a="save">保存</button></div>`);
@@ -995,7 +1143,8 @@ function openGroupModal(gid,done){
     if(agency&&!CAT.agencies.includes(agency))CAT.agencies.push(agency);
     const gen=$('#gm-gen',m).value;
     let target=g;
-    if(g){Object.assign(g,{name,agency,gen,color:st.color})}else{target={id:uid(),name,agency,gen,color:st.color};CAT.groups.push(target)}
+    const emoji=$('#gm-emoji',m).value.trim(),desc=$('#gm-desc',m).value.trim();
+    if(g){Object.assign(g,{name,agency,gen,color:st.color,emoji,desc})}else{target={id:uid(),name,agency,gen,color:st.color,emoji,desc};CAT.groups.push(target)}
     const names=splitTags($('#gm-add',m).value);const existing=new Set(membersOf(target.id).map(x=>x.name));
     names.filter(n=>!existing.has(n)).forEach(n=>CAT.members.push({id:uid(),name:n,groupId:target.id}));
     await saveCat();closeModal();toast(g?'保存しました':`${name}を追加しました`);done?done(target):refresh();
@@ -1017,6 +1166,8 @@ function openChemiModal(cid,done,groupHint){
    <div class="picklist" id="cm-pick"></div>
    <div class="field"><span class="flabel">選択中</span><div class="chips" id="cm-sel"></div></div>
    <div class="field"><label for="cm-name">ケミ名（空欄ならメンバー名から自動）</label><input type="text" id="cm-name" value="${esc(st.name)}" placeholder="例：ミンギュ×ウォヌ"></div>
+   <div class="row" style="align-items:flex-end"><div class="field" style="width:84px;flex:none"><label for="cm-emoji">絵文字</label><input type="text" id="cm-emoji" maxlength="4" value="${esc(c?.emoji||'')}" placeholder="💞"></div>
+   <div class="field" style="flex:1"><label for="cm-desc">紹介文</label><input type="text" id="cm-desc" value="${esc(c?.desc||'')}" placeholder="ケミの名前の由来・メモなど"></div></div>
    <div class="acts">${c?`<button class="btn danger" data-a="del" style="margin-right:auto">削除</button>`:''}<button class="btn" data-a="c">キャンセル</button><button class="btn primary" data-a="s">保存</button></div>`);
   const draw=()=>{$('#cm-pick',m).innerHTML=membersOf(st.g).map(x=>`<button type="button" class="chip ${st.ids.has(x.id)?'on':''}" data-pm="${x.id}">${esc(x.name)}</button>`).join('')||'<span class="note">このグループにはメンバーが未登録です</span>';
     $('#cm-sel',m).innerHTML=[...st.ids].map(id=>M.get(id)).filter(Boolean).map(x=>`<span class="chip">${esc(x.name)}<button type="button" class="x" data-pm="${x.id}" aria-label="外す">×</button></span>`).join('')||'<span class="note">まだ選んでいません</span>';
@@ -1027,7 +1178,8 @@ function openChemiModal(cid,done,groupHint){
     if(a==='del'){if(!await confirmBox(`${c.name}を削除しますか？`,'写真は残り、メンバーの紐づけはそのままです。','削除する'))return;CAT.chemis=CAT.chemis.filter(x=>x.id!==c.id);await saveCat();closeModal();refresh();return;}
     if(st.ids.size<2){toast('メンバーを2人以上選んでください');return;}
     const ids=[...st.ids];const name=$('#cm-name',m).value.trim()||ids.map(id=>M.get(id)?.name).join('×');
-    let t=c;if(c)Object.assign(c,{name,memberIds:ids});else{t={id:uid(),name,memberIds:ids};CAT.chemis.push(t)}
+    const emoji=$('#cm-emoji',m).value.trim(),desc=$('#cm-desc',m).value.trim();
+    let t=c;if(c)Object.assign(c,{name,memberIds:ids,emoji,desc});else{t={id:uid(),name,memberIds:ids,emoji,desc};CAT.chemis.push(t)}
     if(c){for(const md of MEDIA.values())if(md.chemiId===c.id){md.memberIds=[...ids];md.groupIds=chemiGroups(c)}await putMediaMany([...MEDIA.values()].filter(md=>md.chemiId===c.id));}
     await saveCat();closeModal();toast('ケミを保存しました');done?done(t):refresh();});
   draw();
@@ -1036,7 +1188,7 @@ function openChemiModal(cid,done,groupHint){
 /* edit media */
 function openEdit(ids){
   const multi=ids.length>1;const m0=MEDIA.get(ids[0]);
-  const st=multi?{cat:'keep',group:'',member:'',chemi:'',tags:'',memo:''}:{cat:m0.cat,group:m0.groupIds?.[0]||'',member:m0.memberIds?.[0]||'',chemi:m0.chemiId||'',tags:(m0.tags||[]).join(', '),memo:m0.memo||''};
+  const st=multi?{cat:'keep',group:'',member:'',chemi:'',tags:'',memo:'',sub:''}:{cat:m0.cat,group:m0.groupIds?.[0]||'',member:m0.memberIds?.[0]||'',chemi:m0.chemiId||'',tags:(m0.tags||[]).join(', '),memo:m0.memo||'',sub:m0.sub||''};
   if(!multi&&m0.cat==='chemi'){st.group=''}
   const m=openModal(`<h3>${multi?`${ids.length}件の分類をまとめて変更`:'分類・タグを編集'}</h3><div id="ed-form"></div><div class="acts"><button class="btn" data-a="c">キャンセル</button><button class="btn primary" data-a="s">保存</button></div>`);
   mountTagForm($('#ed-form',m),st,{multi,prefix:'ed'});
@@ -1083,7 +1235,7 @@ document.addEventListener('keydown',e=>{if($('#lightbox').hidden||$('#modal-root
 (()=>{let x0=null;const lb=$('#lightbox');lb.addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});lb.addEventListener('touchend',e=>{if(x0===null||LB.ids.length<2)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)>50){LB.i=(LB.i+(dx<0?1:-1)+LB.ids.length)%LB.ids.length;drawLB();}});})();
 
 /* ---------- ADD ---------- */
-const ADD={files:[],st:{cat:'group',group:'',member:'',chemi:'',tags:'',memo:''},saving:false,form:null};
+const ADD={files:[],st:{cat:'group',group:'',member:'',chemi:'',tags:'',memo:'',sub:''},saving:false,form:null};
 function renderAdd(){
   const root=$('#v-add');
   root.innerHTML=`<div class="sec-h"><div><div class="eyebrow">ADD MEDIA</div><h2>写真・動画をまとめて追加</h2></div></div>
@@ -1137,7 +1289,7 @@ async function saveAdd(){
   toast(fail?`${ok}件を保存、${fail}件は保存できませんでした（容量不足の可能性）`:`${ok}件をライブラリに保存しました`);
   const g=ADD.st.group;
   const sc=ADD.st.cat;const cg=sc==='chemi'?(chemiGroups(C.get(ADD.st.chemi)||{memberIds:[]})[0]||g):g;
-  Object.assign(LIB,{mode:'browse',g:cg||'',sec:cg?sc:'',sub:sc==='member'?ADD.st.member:sc==='chemi'?ADD.st.chemi:'',kind:'all'});
+  Object.assign(LIB,{mode:'browse',g:cg||'',sec:cg?sc:'',b:sc==='member'?'m:'+ADD.st.member:sc==='chemi'?'c:'+ADD.st.chemi:'',s:ADD.st.sub||'',kind:'all'});ADD.st.sub='';
   ADD.st.tags='';ADD.st.memo='';
   go('library');
 }
@@ -1261,7 +1413,7 @@ async function importAll(file){
   try{const zip=await JSZip.loadAsync(file);
     const cat=JSON.parse(await zip.file('catalog.json').async('string'));const meta=JSON.parse(await zip.file('media.json').async('string'));
     const gi=new Set(CAT.groups.map(x=>x.id)),mi=new Set(CAT.members.map(x=>x.id)),ci=new Set(CAT.chemis.map(x=>x.id));
-    cat.groups.forEach(x=>{if(!gi.has(x.id))CAT.groups.push(x)});cat.members.forEach(x=>{if(!mi.has(x.id))CAT.members.push(x)});cat.chemis.forEach(x=>{if(!ci.has(x.id))CAT.chemis.push(x)});
+    cat.groups.forEach(x=>{if(!gi.has(x.id))CAT.groups.push(x)});cat.members.forEach(x=>{if(!mi.has(x.id))CAT.members.push(x)});cat.chemis.forEach(x=>{if(!ci.has(x.id))CAT.chemis.push(x)});CAT.subs=CAT.subs||[];const si=new Set(CAT.subs.map(x=>x.id));(cat.subs||[]).forEach(x=>{if(!si.has(x.id))CAT.subs.push(x)});
     (cat.agencies||[]).forEach(a=>{if(!CAT.agencies.includes(a))CAT.agencies.push(a)});await saveCat();
     let n=0,i=0;for(const m of meta){i++;if(out)out.textContent=`${i} / ${meta.length} 件を読み込み中…`;if(MEDIA.has(m.id))continue;
       const fz=zip.file(`files/${m.id}`);if(!fz)continue;const blob=new Blob([await fz.async('arraybuffer')],{type:m.mime||''});
@@ -1281,7 +1433,7 @@ document.addEventListener('click',async e=>{
   if(a==='reset-filters'){const v=VIEW;F[v]=Object.assign(blankF(),{open:F[v].open});renderGridView(v);return;}
   if(a==='more'){SHOWN[b.dataset.view]+=120;renderGridView(b.dataset.view);return;}
   if(a==='toggle-select'){SEL.on?(endSelect(),refresh()):startSelect(VIEW);return;}
-  if(a==='open-group'){LIB.mode='browse';LIB.g=b.dataset.id;LIB.sec='';LIB.sub='';go('library');try{history.pushState({lib:{...LIB}},'','#library')}catch(_){}return;}
+  if(a==='open-group'){LIB.mode='browse';LIB.g=b.dataset.id;LIB.sec='';LIB.b='';LIB.s='';go('library');try{history.pushState({lib:{...LIB}},'','#library')}catch(_){}return;}
   if(a==='go-search'){LIB.mode='search';go('library',{focus:'q'});return;}
   if(a==='toggle-theme'){const dark=document.documentElement.getAttribute('data-theme')==='dark'||(!document.documentElement.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme: dark)').matches);setTheme(dark?'light':'dark');return;}
   if(a==='new-group'){openGroupModal(null);return;}
@@ -1331,7 +1483,7 @@ async function migrateOld(){
 async function boot(){
   bindFilters();
   db=await openDB();
-  if(db){try{const cat=await getMeta('catalog');if(cat)CAT=Object.assign({agencies:[...PRESET_AGENCIES],groups:[],members:[],chemis:[]},cat);
+  if(db){try{const cat=await getMeta('catalog');if(cat)CAT=Object.assign({agencies:[...PRESET_AGENCIES],groups:[],members:[],chemis:[],subs:[]},cat);
       const s=await getMeta('settings');if(s)SET=Object.assign(SET,s);
       const list=await getAllMedia();(list||[]).forEach(m=>MEDIA.set(m.id,m));
       const w=await getMeta('wallpaper');if(w)showWall(w);}catch(e){console.error(e)}}
