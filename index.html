@@ -229,12 +229,12 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .drop{border:2px dashed var(--line);border-radius:var(--r-lg);padding:28px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;background:var(--glass-strong);transition:border-color .15s,background .15s}
 .drop.over{border-color:var(--accent);background:var(--accent-soft)}
 .drop .big{width:58px;height:58px;border-radius:18px;display:grid;place-items:center}
-.pastebox{border:2px dashed var(--line);border-radius:var(--r-md);padding:14px 16px;display:flex;align-items:center;gap:12px;background:var(--glass-strong);cursor:text;-webkit-user-select:text;user-select:text;outline:none;min-height:60px;caret-color:transparent}
-.pastebox:focus,.pastebox.over{border-color:var(--accent);background:var(--accent-soft)}
-.pastebox .big{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none;pointer-events:none}
-.pastebox .t{display:flex;flex-direction:column;gap:2px;pointer-events:none;min-width:0}
-.pastebox .t b{font-size:14px}
-.pastebox .t span{font-size:12px;color:var(--muted)}
+.pastewrap{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-radius:var(--r-md);padding:12px;background:var(--glass-strong)}
+.pastewrap .btn{width:100%}
+.pastebox{border:2px dashed var(--line);border-radius:12px;padding:12px 14px;min-height:48px;outline:none;-webkit-user-select:text;user-select:text;caret-color:transparent;font-size:12.5px;color:var(--muted);overflow:hidden;max-height:120px}
+.pastebox:focus{border-color:var(--accent);background:var(--accent-soft)}
+.pastebox:empty::before{content:attr(data-ph);color:var(--muted);pointer-events:none}
+.pastebox img{max-height:60px;width:auto}
 .drop b{font-size:16px}
 .pgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 @media (min-width:700px){.pgrid{grid-template-columns:repeat(8,minmax(0,1fr))}}
@@ -1240,7 +1240,8 @@ function renderAdd(){
     <div class="panel" style="display:flex;flex-direction:column;gap:14px">
      <label class="drop" id="drop" for="add-input"><span class="big c-pink">${ic('image')}</span><b>写真・動画を選ぶ</b><span class="note">何枚でもまとめて選べます。ここにドラッグ＆ドロップもOK</span>
       <input type="file" id="add-input" accept="image/*,video/*" multiple hidden></label>
-     <div class="pastebox" id="pastebox" contenteditable="true" inputmode="none" role="textbox" aria-label="コピーした写真をここに貼り付け" spellcheck="false"><span class="big c-sky" contenteditable="false">${ic('copy')}</span><span class="t" contenteditable="false"><b>コピーした写真を貼り付け</b><span>ネットの写真を長押し→「コピー」したあと、ここを長押し→「ペースト」（PCは Ctrl / ⌘ + V）</span></span></div>
+     <div class="pastewrap"><button type="button" class="btn primary" id="paste-btn">${ic('copy')}コピーした写真を貼り付け</button>
+      <div class="pastebox" id="pastebox" contenteditable="true" inputmode="none" role="textbox" aria-label="コピーした写真を貼り付ける欄" spellcheck="false" data-ph="ボタンでうまくいかないときは、ここを長押し→「ペースト」（PCは Ctrl / ⌘ + V）"></div></div>
      <div id="add-preview"></div>
     </div>
     <div class="panel" style="display:flex;flex-direction:column;gap:14px">
@@ -1259,32 +1260,78 @@ function renderAdd(){
   ['dragleave','drop'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove('over')}));
   drop.addEventListener('drop',e=>addFiles([...(e.dataTransfer?.files||[])]));
   const pb=$('#pastebox');
-  pb.addEventListener('beforeinput',e=>{if(e.inputType!=='insertFromPaste')e.preventDefault();});
-  pb.addEventListener('input',()=>{resetPasteBox()});
+  pb.addEventListener('beforeinput',e=>{if(e.inputType!=='insertFromPaste'&&e.inputType!=='insertFromDrop')e.preventDefault();});
+  $('#paste-btn').addEventListener('click',pasteFromClipboard);
   pb.addEventListener('drop',e=>{e.preventDefault();addFiles([...(e.dataTransfer?.files||[])]);});
   $('#add-save').addEventListener('click',saveAdd);
   $('#add-preview').addEventListener('click',e=>{const r=e.target.closest('[data-rm]');if(r){const i=+r.dataset.rm;URL.revokeObjectURL(ADD.files[i].url);ADD.files.splice(i,1);drawAddPreview();return;}
     if(e.target.closest('[data-act="clear-add"]')){ADD.files.forEach(f=>URL.revokeObjectURL(f.url));ADD.files=[];drawAddPreview();}});
 }
-function resetPasteBox(){const pb=$('#pastebox');if(!pb)return;[...pb.childNodes].forEach(n=>{if(!(n.nodeType===1&&n.getAttribute('contenteditable')==='false'))n.remove();});}
-function pasteName(type,i){const d=new Date(),p=n=>String(n).padStart(2,'0');const ext=(type.split('/')[1]||'png').replace('jpeg','jpg').replace('quicktime','mov');return `paste_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}_${i+1}.${ext}`;}
+function resetPasteBox(){const pb=$('#pastebox');if(pb)pb.innerHTML='';}
+function pasteName(type,i){const d=new Date(),p=n=>String(n).padStart(2,'0');const ext=(type.split('/')[1]||'png').replace('jpeg','jpg').replace('quicktime','mov').replace(/\+.*$/,'');return `paste_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}_${i+1}.${ext}`;}
+const isMedia=t=>/^(image|video)\//.test(t||'');
+function srcsFromText(html,txt){
+  const srcs=[...String(html||'').matchAll(/<img[^>]+src=["']([^"']+)["']/gi)].map(m=>m[1].replace(/&amp;/g,'&'));
+  const t=String(txt||'').trim();
+  if(!srcs.length&&/^(https?:|data:image)/.test(t))srcs.push(t);
+  return srcs;
+}
+async function fileFromImgEl(img,i){
+  if(!img.complete||!img.naturalWidth)await new Promise(r=>{img.onload=img.onerror=r;setTimeout(r,3000)});
+  if(!img.naturalWidth)return null;
+  try{const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;c.getContext('2d').drawImage(img,0,0);
+    const b=await new Promise(r=>c.toBlob(r,'image/jpeg',.95));return b?new File([b],pasteName('image/jpeg',i),{type:'image/jpeg',lastModified:Date.now()}):null;}catch(e){return null}
+}
+async function filesFromSrcs(srcs,imgEls){
+  const out=[];
+  for(const [i,src] of srcs.slice(0,30).entries()){
+    let f=null;
+    try{const res=await fetch(src);if(res.ok){const b=await res.blob();if(isMedia(b.type))f=new File([b],pasteName(b.type,i),{type:b.type,lastModified:Date.now()});}}catch(_){}
+    if(!f&&imgEls&&imgEls[i])f=await fileFromImgEl(imgEls[i],i);
+    if(f)out.push(f);
+  }
+  return out;
+}
+function takeFiles(files,label){
+  addFiles(files.map((f,i)=>new File([f],f.name&&!/^image\.(png|jpe?g|gif|webp)$/i.test(f.name)?f.name:pasteName(f.type||'image/png',i),{type:f.type||'image/png',lastModified:Date.now()})));
+  toast(`${files.length}件を${label||'貼り付けました'}`);
+}
+const PASTE_FAIL='写真を取り込めませんでした。リンクではなく写真そのものを長押し→「コピー」してから試してください';
+async function pasteFromClipboard(){
+  if(!navigator.clipboard||!navigator.clipboard.read){toast('このブラウザではボタンが使えません。下の欄を長押し→「ペースト」してください');$('#pastebox')?.focus();return;}
+  let items;
+  try{items=await navigator.clipboard.read();}
+  catch(e){toast(e&&e.name==='NotAllowedError'?'貼り付けが許可されませんでした。もう一度押して、出てきた「ペースト」をタップしてください':'クリップボードを読み取れませんでした。下の欄を長押し→「ペースト」で試してください');return;}
+  const files=[];const srcs=[];
+  for(const [i,it] of items.entries()){
+    const mt=it.types.find(isMedia);
+    if(mt){try{const b=await it.getType(mt);files.push(new File([b],pasteName(b.type||mt,i),{type:b.type||mt}))}catch(_){}continue;}
+    try{const html=it.types.includes('text/html')?await (await it.getType('text/html')).text():'';const txt=it.types.includes('text/plain')?await (await it.getType('text/plain')).text():'';srcs.push(...srcsFromText(html,txt));}catch(_){}
+  }
+  if(files.length){takeFiles(files);return;}
+  if(srcs.length){const got=await filesFromSrcs(srcs);if(got.length){takeFiles(got);return;}}
+  toast(PASTE_FAIL);
+}
 async function handlePaste(e){
   if(VIEW!=='add')return;
-  const t=e.target;if(t&&t.closest&&t.closest('input,textarea')&&!t.closest('#pastebox'))return;
-  const cd=e.clipboardData;if(!cd)return;
+  const t=e.target;const inBox=!!(t&&t.closest&&t.closest('#pastebox'));
+  if(t&&t.closest&&t.closest('input,textarea'))return;
+  const cd=e.clipboardData;
   const files=[];
-  [...(cd.items||[])].forEach(it=>{if(it.kind==='file'){const f=it.getAsFile();if(f&&/^(image|video)\//.test(f.type||''))files.push(f)}});
-  if(!files.length)[...(cd.files||[])].forEach(f=>{if(/^(image|video)\//.test(f.type||''))files.push(f)});
-  e.preventDefault();setTimeout(resetPasteBox,0);
-  if(files.length){addFiles(files.map((f,i)=>new File([f],f.name&&!/^image\.(png|jpe?g)$/i.test(f.name)?f.name:pasteName(f.type||'image/png',i),{type:f.type||'image/png',lastModified:Date.now()})));toast(`${files.length}件を貼り付けました`);return;}
-  const html=cd.getData('text/html')||'';const txt=(cd.getData('text/plain')||'').trim();
-  const srcs=[...html.matchAll(/<img[^>]+src=["']([^"']+)["']/gi)].map(m=>m[1]);
-  if(!srcs.length&&/^(https?:|data:image)/.test(txt)&&/\.(jpe?g|png|gif|webp|avif|heic)(\?|$)|^data:image/i.test(txt))srcs.push(txt);
-  if(!srcs.length){toast('貼り付けられる写真が見つかりませんでした。写真そのものを長押し→「コピー」してください');return;}
-  let ok=0;const got=[];
-  for(const [i,src] of srcs.slice(0,30).entries()){try{const res=await fetch(src.replace(/&amp;/g,'&'));if(!res.ok)throw 0;const b=await res.blob();if(!/^(image|video)\//.test(b.type))throw 0;got.push(new File([b],pasteName(b.type,i),{type:b.type,lastModified:Date.now()}));ok++;}catch(_){}}
-  if(got.length){addFiles(got);toast(`${ok}件を貼り付けました`);}
-  else toast('このサイトの写真はリンクからは取り込めませんでした。写真を長押し→「コピー」で試してください');
+  if(cd){[...(cd.items||[])].forEach(it=>{if(it.kind==='file'){const f=it.getAsFile();if(f&&isMedia(f.type))files.push(f)}});
+    if(!files.length)[...(cd.files||[])].forEach(f=>{if(isMedia(f.type))files.push(f)});}
+  if(files.length){e.preventDefault();resetPasteBox();takeFiles(files);return;}
+  const srcs=cd?srcsFromText(cd.getData('text/html'),cd.getData('text/plain')):[];
+  if(inBox){
+    // let Safari insert the pasted picture into the box, then read it from there
+    setTimeout(async()=>{const pb=$('#pastebox');const imgs=pb?[...pb.querySelectorAll('img')]:[];
+      const got=imgs.length?await filesFromSrcs(imgs.map(x=>x.getAttribute('src')||''),imgs):srcs.length?await filesFromSrcs(srcs):[];
+      resetPasteBox();if(got.length)takeFiles(got);else toast(PASTE_FAIL);},120);
+    return;
+  }
+  e.preventDefault();
+  if(!srcs.length){toast(PASTE_FAIL);return;}
+  const got=await filesFromSrcs(srcs);if(got.length)takeFiles(got);else toast(PASTE_FAIL);
 }
 document.addEventListener('paste',handlePaste);
 function addFiles(files){let skipped=0;files.forEach(f=>{const k=kindOf(f);if(!k){skipped++;return}ADD.files.push({file:f,kind:k,url:URL.createObjectURL(f)})});if(skipped)toast(`${skipped}件は写真・動画ではないため除きました`);drawAddPreview();}
