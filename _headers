@@ -1,0 +1,5 @@
+/icons/*
+  Cache-Control: public, max-age=2592000
+
+/manifest.webmanifest
+  Cache-Control: public, max-age=86400
