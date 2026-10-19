@@ -81,8 +81,10 @@ body.has-wall #shade{opacity:var(--shade)}
 .topnav{display:none;margin-left:auto;gap:4px}
 .topnav button{border:0;background:none;padding:8px 14px;border-radius:999px;color:var(--muted);font-weight:500;display:flex;gap:6px;align-items:center}
 .topnav button.on{background:var(--accent-soft);color:var(--accent)}
-.top-search{margin-left:auto;border:1px solid var(--line);background:var(--glass);width:38px;height:38px;border-radius:12px;display:grid;place-items:center}
-@media (min-width:860px){.topnav{display:flex}.top-search{margin-left:8px}}
+.top-search{margin-left:0;border:1px solid var(--line);background:var(--glass);width:38px;height:38px;border-radius:12px;display:grid;place-items:center}
+@media (min-width:860px){.topnav{display:flex}}
+.top-tools{margin-left:auto;display:flex;gap:6px}
+@media (min-width:860px){.top-tools{margin-left:8px}}
 
 main{max-width:1180px;margin:0 auto;padding-block:18px 120px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 @media (min-width:860px){main{padding-bottom:60px}}
@@ -135,7 +137,7 @@ svg.i{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-widt
 .hscroll{display:grid;grid-auto-flow:column;grid-auto-columns:min(46%,200px);gap:12px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory}
 .gcard{scroll-snap-align:start;border:1px solid var(--line);background:var(--glass-strong);border-radius:18px;overflow:hidden;padding:0;text-align:left;display:flex;flex-direction:column}
 .gcard .cover{aspect-ratio:4/3;max-width:100%;background:var(--lilac-soft);display:grid;place-items:center;overflow:hidden;position:relative}
-.gcard .cover img{width:100%;height:100%;object-fit:cover}
+.gcard .cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .gcard .cover .init{font-family:var(--display);font-size:26px;color:var(--gcol,var(--lilac))}
 .gcard .meta{padding:9px 12px 11px;display:flex;flex-direction:column;gap:1px;min-width:0}
 .gcard .meta b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -319,6 +321,44 @@ details.presets summary{cursor:pointer;font-size:13px;font-weight:700;color:var(
 .dayrow .t span{color:var(--muted);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .tile .date{position:absolute;right:6px;bottom:6px;font-size:10px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.8);font-variant-numeric:tabular-nums}
 .selecting .tile .date{display:none}
+/* browse + icons */
+.libmode{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.libmode .seg{flex:0 1 auto}
+.crumbs{display:flex;gap:2px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.crumbs button{border:0;background:none;color:var(--accent);padding:4px 6px;font-weight:700;border-radius:8px}
+.crumbs button:hover{background:var(--accent-soft)}
+.crumbs b{padding:4px 6px;color:var(--ink)}
+.icogrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 14px}
+@media (min-width:600px){.icogrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (min-width:980px){.icogrid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.icogrid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (min-width:700px){.icogrid.three{max-width:640px}}
+.icard{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;cursor:pointer;min-width:0;border-radius:18px;padding:4px;outline-offset:2px}
+.icard:hover .ico{transform:translateY(-2px)}
+.ico{position:relative;width:100%;aspect-ratio:1;max-width:100%;border-radius:28%;overflow:hidden;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-family:var(--display);font-style:italic;font-weight:800;font-size:clamp(20px,6vw,30px);box-shadow:var(--shadow-sm),inset 0 0 0 1px var(--line);transition:transform .15s ease}
+.ico img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ico.round{border-radius:50%}
+.ico svg.i{width:38%;height:38%;stroke-width:1.6}
+.ico.add{background:transparent;border:2px dashed var(--line);box-shadow:none;color:var(--muted)}
+.icard b{font-size:13.5px;line-height:1.3;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.icard small{font-size:11.5px;color:var(--muted);margin-top:-4px;font-variant-numeric:tabular-nums}
+.icard .edit{position:absolute;top:0;right:0;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--glass-strong);box-shadow:var(--shadow-sm);display:grid;place-items:center;color:var(--ink);padding:0;z-index:2}
+.icard .edit svg.i{width:15px;height:15px}
+.ghead{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.ghead .icard{width:96px;flex:none;padding:0}
+.ghead .info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ghead h3{font-family:var(--display);font-style:italic;font-weight:800;font-size:clamp(22px,6vw,32px);line-height:1.1;overflow-wrap:anywhere}
+.ghead .info span{font-size:12.5px;color:var(--muted)}
+.ghead .btn-row{margin-top:6px}
+.phead{display:flex;align-items:center;gap:12px}
+.phead .ico{width:52px;flex:none;font-size:18px}
+.phead h3{font-size:18px}
+.phead span{font-size:12.5px;color:var(--muted)}
+.iconpick{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;max-height:300px;overflow-y:auto}
+.iconpick button{border:0;padding:0;aspect-ratio:1;max-width:100%;border-radius:10px;overflow:hidden;background:var(--lilac-soft)}
+.iconpick img{width:100%;height:100%;object-fit:cover}
+.icon-prev{width:120px;align-self:center}
+.theme-btn{border:1px solid var(--line);background:var(--glass);width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:none}
 #toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:13.5px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100% - 32px)}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .warn{background:var(--accent-soft);color:var(--ink);border-radius:12px;padding:10px 14px;font-size:13px}
@@ -337,7 +377,7 @@ details.presets summary{cursor:pointer;font-size:13px;font-weight:700;color:var(
     <span class="brand-t"><b>KPhoto</b><small>K-POP PHOTO LIBRARY</small></span>
   </button>
   <nav class="topnav" id="topnav"></nav>
-  <button class="top-search" data-go="library" data-focus="q" aria-label="写真を探す"></button>
+  <div class="top-tools"><button class="theme-btn" id="theme-btn" data-act="toggle-theme" aria-label="ライト・ダークを切り替え"></button><button class="top-search" data-act="go-search" aria-label="写真を探す"></button></div>
 </div></header>
 
 <main id="app">
@@ -389,6 +429,9 @@ const P={
  box:'<path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/>',
  select:'<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
  cal:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="8" cy="14.5" r=".8" fill="currentColor"/><circle cx="12" cy="14.5" r=".8" fill="currentColor"/>',
+ sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/>',
+ moon:'<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
+ camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
  video:'<rect x="3" y="6" width="13" height="12" rx="3"/><path d="M16 10l5-3v10l-5-3z"/>',
 };
 const ic=(n,cls='')=>`<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[n]||''}</svg>`;
@@ -434,6 +477,9 @@ const CAL={y:new Date().getFullYear(),m:new Date().getMonth(),day:'',basis:'adde
 const tsOf=m=>CAL.basis==='taken'?(m.taken||m.added):m.added;
 const SEL={on:false,ids:new Set(),view:null};
 const urlCache=new Map();
+let ICONS=new Map();const iconUrlCache=new Map();
+const LIB={mode:'browse',g:'',sec:'',sub:'',kind:'all',sort:'new'};
+let THEME='auto';
 function thumbURL(m){if(!m||!m.thumb)return null;let u=urlCache.get(m.id);if(!u){u=URL.createObjectURL(m.thumb);urlCache.set(m.id,u)}return u;}
 function dropURL(id){const u=urlCache.get(id);if(u){URL.revokeObjectURL(u);urlCache.delete(id)}}
 
@@ -521,15 +567,14 @@ function go(v,opts={}){
   if(opts.focus){setTimeout(()=>{const el=$(`#${v}-q`);el&&el.focus()},50)}
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(!b)return;e.preventDefault();go(b.dataset.go,{focus:b.dataset.focus});});
-function render(v){({home:renderHome,library:()=>renderGridView('library'),add:renderAdd,calendar:renderCalendar,collection:()=>renderGridView('collection'),room:renderRoom})[v]?.();}
+function render(v){({home:renderHome,library:renderLibrary,add:renderAdd,calendar:renderCalendar,collection:()=>renderGridView('collection'),room:renderRoom})[v]?.();}
 function refresh(){render(VIEW)}
 
 /* ---------- HOME ---------- */
 function renderHome(){
   const all=[...MEDIA.values()];const photos=all.filter(m=>m.kind==='photo').length,videos=all.length-photos,favs=all.filter(m=>m.fav).length;
-  const recent=all.sort((a,b)=>b.added-a.added).slice(0,12);LAST.home=recent.map(m=>m.id);
+  const favList=all.filter(m=>m.fav).sort((a,b)=>(b.favAt||b.added)-(a.favAt||a.added));const recent=favList.slice(0,12);LAST.home=recent.map(m=>m.id);
   const groups=sortedGroups();
-  const cover=g=>{const list=[...MEDIA.values()].filter(m=>(m.groupIds||[]).includes(g.id)&&m.thumb);const pick=list.find(m=>m.cat==='group')||list[0];return pick?thumbURL(pick):null;};
   const count=g=>[...MEDIA.values()].filter(m=>(m.groupIds||[]).includes(g.id)).length;
   $('#v-home').innerHTML=`
   <div class="panel hero">
@@ -558,15 +603,13 @@ function renderHome(){
     </div>
   </div>
   <div class="panel">
-    <div class="sec-h" style="margin-bottom:12px"><h2>グループから見る</h2><span class="eyebrow">GROUPS</span>${groups.length?`<button class="more" data-act="go-room-groups">管理 ›</button>`:''}</div>
-    ${groups.length?`<div class="hscroll">${groups.map(g=>{const u=cover(g);return `<button class="gcard" data-act="open-group" data-id="${g.id}" style="--gcol:${esc(g.color)}">
-      <div class="cover">${u?`<img src="${u}" alt="">`:`<span class="init">${esc(g.name.slice(0,2).toUpperCase())}</span>`}</div>
-      <div class="meta"><b><span class="dot"></span>${esc(g.name)}</b><span>${esc(g.agency||'事務所未設定')} · ${genLabel(g.gen)} · ${count(g)}件</span></div></button>`}).join('')}</div>`
+    <div class="sec-h" style="margin-bottom:12px"><h2>グループから見る</h2><span class="eyebrow">GROUPS</span>${groups.length?`<button class="more" data-go="library">すべて見る ›</button>`:''}</div>
+    ${groups.length?`<div class="icogrid">${groups.map(g=>`<div class="icard" role="button" tabindex="0" data-act="open-group" data-id="${g.id}">${iconHTML('g:'+g.id,g.name)}<b>${esc(g.name)}</b><small>${count(g)}件</small></div>`).join('')}</div>`
     :emptyHTML('users','c-sky','まずはグループを登録','推しのグループとメンバーを登録すると、写真をグループ全体・個人・ケミで整理できます。','<button class="btn primary" data-act="new-group">'+ic('plus')+'グループを追加</button> <button class="btn" data-act="go-room-groups">プリセットから選ぶ</button>')}
   </div>
   <div class="panel">
-    <div class="sec-h" style="margin-bottom:12px"><h2>最近追加した写真・動画</h2><span class="eyebrow">RECENT</span>${recent.length?`<button class="more" data-go="library">すべて見る ›</button>`:''}</div>
-    ${recent.length?`<div class="grid" data-view="home">${recent.map(tileHTML).join('')}</div>`:emptyHTML('image','c-pink','まだ写真がありません','「まとめて追加」から、写真や動画を何枚でも一度に保存できます。','<button class="btn primary" data-go="add">'+ic('plus')+'写真・動画を追加</button>')}
+    <div class="sec-h" style="margin-bottom:12px"><h2>☆ お気に入り</h2><span class="eyebrow">MY COLLECTION</span>${favList.length?`<button class="more" data-go="collection">すべて見る（${favList.length}） ›</button>`:''}</div>
+    ${recent.length?`<div class="grid" data-view="home">${recent.map(tileHTML).join('')}</div>`:(all.length?emptyHTML('star','c-pink','☆を付けた写真がここに並びます','写真の☆をタップすると、ホームのお気に入りに表示されます。','<button class="btn primary" data-go="library">ライブラリを開く</button>'):emptyHTML('image','c-pink','まだ写真がありません','「まとめて追加」から、写真や動画を何枚でも一度に保存できます。','<button class="btn primary" data-go="add">'+ic('plus')+'写真・動画を追加</button>'))}
   </div>`;
   hydrate($('#v-home'));
 }
@@ -586,7 +629,7 @@ async function hydrate(root){
 }
 document.addEventListener('click',async e=>{
   const st=e.target.closest('[data-star]');
-  if(st){e.stopPropagation();const m=MEDIA.get(st.dataset.star);if(!m)return;m.fav=!m.fav;await putMedia(m);toast(m.fav?'☆ My Collectionに追加しました':'My Collectionから外しました');
+  if(st){e.stopPropagation();const m=MEDIA.get(st.dataset.star);if(!m)return;m.fav=!m.fav;m.favAt=Date.now();await putMedia(m);toast(m.fav?'☆ My Collectionに追加しました':'My Collectionから外しました');
     if(VIEW==='collection'||VIEW==='home')refresh();else{st.classList.toggle('on',m.fav);st.textContent=m.fav?'★':'☆'}return;}
   const t=e.target.closest('[data-tile]');if(!t)return;
   const id=t.dataset.tile;
@@ -646,7 +689,7 @@ function renderGridView(view){
   const root=$('#v-'+view);const f=F[view];const list=filtered(view);LAST[view]=list.map(m=>m.id);
   const shown=list.slice(0,SHOWN[view]);
   const isCol=view==='collection';
-  const head=isCol?`<div class="sec-h"><div><div class="eyebrow">MY COLLECTION</div><h2>☆ お気に入り</h2></div></div>`:`<div class="sec-h"><div><div class="eyebrow">LIBRARY</div><h2>ライブラリ</h2></div></div>`;
+  const head=isCol?`<div class="sec-h"><div><div class="eyebrow">MY COLLECTION</div><h2>☆ お気に入り</h2></div></div>`:libHeadHTML();
   let body;
   if(!MEDIA.size)body=`<div class="panel">${emptyHTML('image','c-pink','まだ写真・動画がありません','「追加」から複数の写真・動画をまとめて保存できます。','<button class="btn primary" data-go="add">'+ic('plus')+'まとめて追加</button>')}</div>`;
   else if(!list.length)body=`<div class="panel">${isCol&&![...MEDIA.values()].some(m=>m.fav)?emptyHTML('star','c-pink','☆を付けた写真がここに集まります','ライブラリで写真の☆をタップすると、My Collectionに登録されます。','<button class="btn primary" data-go="library">ライブラリを開く</button>'):emptyHTML('search','c-lilac','条件に合う写真がありません','絞り込み条件を変えるか、リセットしてください。','<button class="btn" data-act="reset-filters">条件をリセット</button>')}</div>`;
@@ -661,12 +704,12 @@ function renderGridView(view){
 function bindFilters(){
   ['library','collection'].forEach(view=>{
     const root=$('#v-'+view);
-    root.addEventListener('change',e=>{const k=e.target.dataset.f;if(!k||k==='q')return;const f=F[view];f[k]=e.target.value;
+    root.addEventListener('change',e=>{if(view==='library'&&LIB.mode!=='search')return;const k=e.target.dataset.f;if(!k||k==='q')return;const f=F[view];f[k]=e.target.value;
       if(k==='agency'||k==='gen'){if(f.group&&!(G.get(f.group)&&(!f.agency||G.get(f.group).agency===f.agency)&&(!f.gen||G.get(f.group).gen===f.gen))){f.group='';f.member='';f.chemi=''}}
       if(k==='group'){f.member='';f.chemi=''}
       SHOWN[view]=120;renderGridView(view);});
     root.addEventListener('input',e=>{if(e.target.dataset.f!=='q')return;F[view].q=e.target.value;clearTimeout(root._qt);root._qt=setTimeout(()=>{const pos=e.target.selectionStart;renderGridView(view);const el=$(`#${view}-q`);el.focus();try{el.setSelectionRange(pos,pos)}catch(_){}},260);});
-    root.addEventListener('click',e=>{const f=F[view];
+    root.addEventListener('click',e=>{if(view==='library'&&LIB.mode!=='search')return;const f=F[view];
       const c=e.target.closest('[data-fcat]');if(c){f.cat=c.dataset.fcat;renderGridView(view);return;}
       const k=e.target.closest('[data-fkind]');if(k){f.kind=k.dataset.fkind;renderGridView(view);return;}
       const pm=e.target.closest('[data-pickmember]');if(pm){f.member=pm.dataset.pickmember;f.chemi='';renderGridView(view);return;}
@@ -674,6 +717,157 @@ function bindFilters(){
     });
   });
 }
+
+/* ---------- icons ---------- */
+async function loadIcons(){try{const o=await getMeta('icons');ICONS=new Map(Object.entries(o||{}))}catch(e){ICONS=new Map()}}
+async function saveIcons(){try{await putMeta('icons',Object.fromEntries(ICONS))}catch(e){}}
+function scopeList(key){
+  const [t,id,sec]=key.split(':');const all=[...MEDIA.values()];const inG=m=>(m.groupIds||[]).includes(id);
+  let l=[];
+  if(t==='g')l=all.filter(inG);
+  else if(t==='gs')l=all.filter(m=>inG(m)&&m.cat===sec);
+  else if(t==='m')l=all.filter(m=>(m.memberIds||[]).includes(id));
+  else if(t==='c')l=all.filter(m=>m.chemiId===id);
+  return l.sort((a,b)=>b.added-a.added);
+}
+function iconURL(key){
+  const b=ICONS.get(key);
+  if(b){let u=iconUrlCache.get(key);if(!u){u=URL.createObjectURL(b);iconUrlCache.set(key,u)}return u;}
+  const l=scopeList(key);const [t]=key.split(':');
+  const pick=(t==='m'?l.find(m=>m.cat==='member'&&m.thumb):null)||(t==='g'?l.find(m=>m.cat==='group'&&m.thumb):null)||l.find(m=>m.thumb);
+  return pick?thumbURL(pick):null;
+}
+function iconHTML(key,label,{round=false,fallback=''}={}){
+  const u=iconURL(key);
+  return `<span class="ico ${round?'round':''}">${u?`<img src="${u}" alt="">`:(fallback||esc(String(label||'?').replace(/\s+/g,'').slice(0,2).toUpperCase()))}</span>`;
+}
+async function squareIcon(blob){
+  const u=URL.createObjectURL(blob);
+  try{const img=await loadImg(u);const s=Math.min(img.naturalWidth,img.naturalHeight);if(!s)return null;
+    const c=document.createElement('canvas');c.width=c.height=360;
+    c.getContext('2d').drawImage(img,(img.naturalWidth-s)/2,(img.naturalHeight-s)/2,s,s,0,0,360,360);
+    return await new Promise(r=>c.toBlob(r,'image/jpeg',.88));
+  }catch(e){return null}finally{URL.revokeObjectURL(u)}
+}
+async function setIcon(key,blob){const old=iconUrlCache.get(key);if(old){URL.revokeObjectURL(old);iconUrlCache.delete(key)}
+  if(blob)ICONS.set(key,blob);else ICONS.delete(key);await saveIcons();refresh();}
+function openIconModal(key,title){
+  const l=scopeList(key).filter(m=>m.thumb).slice(0,80);const has=ICONS.has(key);
+  const m=openModal(`<h3>${esc(title)}のアイコン</h3>
+   <div class="icon-prev">${iconHTML(key,title,{round:key.startsWith('m:')})}</div>
+   <div class="btn-row" style="justify-content:center"><label class="btn primary" for="icon-file">${ic('image')}端末の写真から選ぶ</label>${has?`<button class="btn ghost" data-a="clear">設定を外す</button>`:''}
+    <input type="file" id="icon-file" accept="image/*" hidden></div>
+   ${l.length?`<div class="flabel">保存済みの写真から選ぶ</div><div class="iconpick">${l.map(x=>`<button type="button" data-pick="${x.id}" aria-label="この写真をアイコンにする"><img src="${thumbURL(x)}" alt=""></button>`).join('')}</div>`:'<p class="note" style="margin:0">写真を追加すると、ここから選べるようになります。</p>'}
+   <p class="note" style="margin:0">${has?'':'未設定のあいだは、いちばん新しい写真が自動でアイコンになります。'}写真は正方形に切り取られます。</p>
+   <div class="acts"><button class="btn" data-a="close">閉じる</button></div>`);
+  $('#icon-file',m).addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;const b=await squareIcon(f);if(!b){toast('この画像は読み込めませんでした');return}await setIcon(key,b);closeModal();toast('アイコンを設定しました');});
+  m.addEventListener('click',async e=>{const p=e.target.closest('[data-pick]');if(p){const x=MEDIA.get(p.dataset.pick);const b=x&&x.thumb?await squareIcon(x.thumb):null;if(b){await setIcon(key,b);closeModal();toast('アイコンを設定しました')}return;}
+    const a=e.target.closest('[data-a]')?.dataset.a;if(a==='close')closeModal();if(a==='clear'){await setIcon(key,null);closeModal();toast('アイコンの設定を外しました')}});
+}
+
+/* ---------- library: browse by group ---------- */
+const SECS=[['group','グループ全体','users'],['member','個人','user'],['chemi','ケミ','chemi']];
+function libNav(patch){Object.assign(LIB,patch);SHOWN.library=120;if(SEL.on)endSelect();try{history.pushState({lib:{...LIB}},'','#library')}catch(e){}renderLibrary();window.scrollTo({top:0});}
+window.addEventListener('popstate',e=>{if(VIEW!=='library')return;const st=e.state&&e.state.lib;Object.assign(LIB,st||{g:'',sec:'',sub:''});if(!st)LIB.mode='browse';if(SEL.on)endSelect();renderLibrary();});
+function libHeadHTML(){
+  return `<div class="libmode"><div><div class="eyebrow">LIBRARY</div><h2 style="font-size:18px">ライブラリ</h2></div>
+   <div class="seg" style="margin-left:auto" role="group" aria-label="見かた"><button class="${LIB.mode==='browse'?'on':''}" data-libmode="browse">グループから</button><button class="${LIB.mode==='search'?'on':''}" data-libmode="search">${ic('search')} 条件で探す</button></div></div>`;
+}
+function renderLibrary(){
+  if(LIB.mode==='search'){renderGridView('library');return;}
+  const root=$('#v-library');const all=[...MEDIA.values()];
+  if(LIB.g&&!G.get(LIB.g)){LIB.g='';LIB.sec='';LIB.sub=''}
+  const g=G.get(LIB.g);
+  const editBtn=(key,title)=>`<button class="edit" data-icon="${esc(key)}" data-title="${esc(title)}" aria-label="${esc(title)}のアイコンを変更">${ic('camera')}</button>`;
+  const card=(key,title,count,attrs,opts={})=>`<div class="icard" role="button" tabindex="0" ${attrs}>${editBtn(key,title)}${iconHTML(key,title,opts)}<b>${esc(title)}</b><small>${count}件</small></div>`;
+  const crumbs=[];
+  let body='';
+  if(!g){
+    const groups=sortedGroups();
+    const cnt=gid=>all.filter(m=>(m.groupIds||[]).includes(gid)).length;
+    body=`<div class="panel" style="display:flex;flex-direction:column;gap:16px">
+      <div class="sec-h"><h2 style="font-size:16px">グループ</h2><span class="muted" style="font-size:12.5px">アイコンの ${ic('camera')} で画像を変えられます</span></div>
+      ${groups.length?`<div class="icogrid">${groups.map(x=>card('g:'+x.id,x.name,cnt(x.id),`data-libg="${x.id}"`)).join('')}
+        <div class="icard" role="button" tabindex="0" data-act="new-group"><span class="ico add">${ic('plus')}</span><b>グループを追加</b></div></div>`
+      :emptyHTML('users','c-sky','まずはグループを登録','グループを登録すると、ここにアイコンで並びます。','<button class="btn primary" data-act="new-group">'+ic('plus')+'グループを追加</button> <button class="btn" data-act="go-room-groups">プリセットから選ぶ</button>')}
+    </div>`;
+  }else{
+    crumbs.push(`<button data-crumb="root">ライブラリ</button>`);
+    const inG=m=>(m.groupIds||[]).includes(g.id);
+    if(!LIB.sec){
+      crumbs.push(`<b>${esc(g.name)}</b>`);
+      const secCount=sec=>all.filter(m=>inG(m)&&m.cat===sec).length;
+      body=`<div class="panel" style="display:flex;flex-direction:column;gap:20px">
+        <div class="ghead">${card('g:'+g.id,g.name,all.filter(inG).length,'data-noop="1"').replace(/<b>.*<\/small>/,'')}
+          <div class="info"><h3>${esc(g.name)}</h3><span>${esc(g.agency||'事務所未設定')} · ${genLabel(g.gen)} · ${membersOf(g.id).length}人</span>
+           <div class="btn-row"><button class="btn sm" data-act="edit-group" data-id="${g.id}">${ic('edit')}グループ情報を編集</button></div></div></div>
+        <div class="icogrid three">${SECS.map(([sec,label,icn])=>card(`gs:${g.id}:${sec}`,label,secCount(sec),`data-libsec="${sec}"`,{fallback:ic(icn)})).join('')}</div>
+      </div>`;
+    }else{
+      const secLabel=SECS.find(x=>x[0]===LIB.sec)?.[1]||'';
+      crumbs.push(`<button data-crumb="group">${esc(g.name)}</button>`);
+      let list=null,ph='';
+      if(LIB.sec==='group'){crumbs.push(`<b>${secLabel}</b>`);list=all.filter(m=>inG(m)&&m.cat==='group');ph=`<div class="phead">${iconHTML(`gs:${g.id}:group`,secLabel,{fallback:ic('users')})}<div><h3>${esc(g.name)} · グループ全体</h3><span>${list.length}件</span></div></div>`;}
+      else if(!LIB.sub){
+        crumbs.push(`<b>${secLabel}</b>`);
+        if(LIB.sec==='member'){const mem=membersOf(g.id);
+          body=`<div class="panel" style="display:flex;flex-direction:column;gap:16px"><div class="sec-h"><h2 style="font-size:16px">${esc(g.name)} · 個人</h2><span class="muted" style="font-size:12.5px">${mem.length}人</span></div>
+           <div class="icogrid">${mem.map(x=>card('m:'+x.id,x.name,all.filter(m=>m.cat==='member'&&m.memberIds?.[0]===x.id).length,`data-libsub="${x.id}"`,{round:true})).join('')}
+           <div class="icard" role="button" tabindex="0" data-addmember="${g.id}"><span class="ico round add">${ic('plus')}</span><b>メンバーを追加</b></div></div></div>`;}
+        else{const ch=CAT.chemis.filter(c=>chemiGroups(c).includes(g.id));
+          body=`<div class="panel" style="display:flex;flex-direction:column;gap:16px"><div class="sec-h"><h2 style="font-size:16px">${esc(g.name)} · ケミ</h2><span class="muted" style="font-size:12.5px">${ch.length}組</span></div>
+           <div class="icogrid">${ch.map(c=>card('c:'+c.id,c.name,all.filter(m=>m.chemiId===c.id).length,`data-libsub="${c.id}"`)).join('')}
+           <div class="icard" role="button" tabindex="0" data-addchemi="${g.id}"><span class="ico add">${ic('plus')}</span><b>ケミを作る</b></div></div></div>`;}
+      }else{
+        crumbs.push(`<button data-crumb="sec">${secLabel}</button>`);
+        if(LIB.sec==='member'){const mm=M.get(LIB.sub);crumbs.push(`<b>${esc(mm?.name||'')}</b>`);list=all.filter(m=>m.cat==='member'&&m.memberIds?.[0]===LIB.sub);ph=`<div class="phead">${iconHTML('m:'+LIB.sub,mm?.name,{round:true})}<div><h3>${esc(mm?.name||'')}</h3><span>${esc(g.name)} · 個人 · ${list.length}件</span></div></div>`;}
+        else{const c=C.get(LIB.sub);crumbs.push(`<b>${esc(c?.name||'')}</b>`);list=all.filter(m=>m.chemiId===LIB.sub);ph=`<div class="phead">${iconHTML('c:'+LIB.sub,c?.name)}<div><h3>${esc(c?.name||'')}</h3><span>ケミ · ${list.length}件</span></div></div>`;}
+      }
+      if(list){
+        const kindCount=k=>list.filter(m=>k==='all'||m.kind===k).length;
+        list=list.filter(m=>LIB.kind==='all'||m.kind===LIB.kind).sort((a,b)=>LIB.sort==='old'?a.added-b.added:b.added-a.added);
+        LAST.library=list.map(m=>m.id);const shown=list.slice(0,SHOWN.library);
+        body=`<div class="panel" style="display:flex;flex-direction:column;gap:14px">${ph}
+          <div class="resline"><div class="seg" role="group" aria-label="種類">${[['all','すべて'],['photo','写真'],['video','動画']].map(([v,l])=>`<button class="${LIB.kind===v?'on':''}" data-libkind="${v}">${l} ${kindCount(v)}</button>`).join('')}</div>
+           <span class="sp"><button class="btn sm ${SEL.on?'primary':''}" data-act="toggle-select">${ic('select')}${SEL.on?'選択を終了':'選択'}</button>
+           <select id="browse-sort" aria-label="並び順">${opt('new','新しい順',LIB.sort)}${opt('old','古い順',LIB.sort)}</select></span></div>
+          ${list.length?`<div class="grid ${SEL.on?'selecting':''}" data-view="library">${shown.map(tileHTML).join('')}</div>
+          ${list.length>shown.length?`<div style="text-align:center"><button class="btn" data-libmore="1">もっと見る（残り${list.length-shown.length}件）</button></div>`:''}`
+          :emptyHTML('image','c-pink','まだ写真がありません','「追加」で分類をここに合わせて保存すると表示されます。','<button class="btn primary" data-libadd="1">'+ic('plus')+'ここに追加</button>')}
+        </div>`;
+      }
+    }
+  }
+  root.innerHTML=libHeadHTML()+(crumbs.length?`<nav class="crumbs" aria-label="現在の場所">${crumbs.join('<span>›</span>')}</nav>`:'')+body;
+  hydrate(root);
+}
+$('#v-library').addEventListener('click',e=>{
+  if(LIB.mode==='search'&&!e.target.closest('[data-libmode]'))return;
+  const ed=e.target.closest('[data-icon]');if(ed){e.stopPropagation();openIconModal(ed.dataset.icon,ed.dataset.title);return;}
+  const md=e.target.closest('[data-libmode]');if(md){LIB.mode=md.dataset.libmode;if(SEL.on)endSelect();renderLibrary();return;}
+  const cr=e.target.closest('[data-crumb]');if(cr){const c=cr.dataset.crumb;libNav(c==='root'?{g:'',sec:'',sub:''}:c==='group'?{sec:'',sub:''}:{sub:''});return;}
+  const gg=e.target.closest('[data-libg]');if(gg){libNav({g:gg.dataset.libg,sec:'',sub:''});return;}
+  const sc=e.target.closest('[data-libsec]');if(sc){libNav({sec:sc.dataset.libsec,sub:'',kind:'all'});return;}
+  const sb=e.target.closest('[data-libsub]');if(sb){libNav({sub:sb.dataset.libsub,kind:'all'});return;}
+  const k=e.target.closest('[data-libkind]');if(k){LIB.kind=k.dataset.libkind;renderLibrary();return;}
+  if(e.target.closest('[data-libmore]')){SHOWN.library+=120;renderLibrary();return;}
+  const am=e.target.closest('[data-addmember]');if(am){openMemberQuick(am.dataset.addmember);return;}
+  const ac=e.target.closest('[data-addchemi]');if(ac){openChemiModal(null,null,ac.dataset.addchemi);return;}
+  if(e.target.closest('[data-libadd]')){Object.assign(ADD.st,{cat:LIB.sec,group:LIB.sec==='chemi'?LIB.g:LIB.g,member:LIB.sec==='member'?LIB.sub:'',chemi:LIB.sec==='chemi'?LIB.sub:''});go('add');return;}
+});
+$('#v-library').addEventListener('change',e=>{if(e.target.id==='browse-sort'){LIB.sort=e.target.value;renderLibrary();}});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches?.('.icard[role=button]')){e.preventDefault();e.target.click();}});
+
+/* ---------- theme ---------- */
+function applyTheme(){const r=document.documentElement;
+  if(THEME==='auto'){if(r.hasAttribute('data-kp-theme')){r.removeAttribute('data-theme');r.removeAttribute('data-kp-theme')}}else{r.setAttribute('data-theme',THEME);r.setAttribute('data-kp-theme','1')}
+  const at=r.getAttribute('data-theme');const dark=at?at==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+  const b=$('#theme-btn');if(b){b.innerHTML=ic(dark?'sun':'moon');b.setAttribute('aria-label',dark?'ライトモードにする':'ダークモードにする');}
+  const mt=document.querySelector('meta[name="theme-color"]');if(mt)mt.content=dark?'#081028':'#eef4fd';}
+function setTheme(t){THEME=t;try{localStorage.setItem('kphoto-theme',t)}catch(e){}applyTheme();if(VIEW==='room')renderRoom();toast(t==='auto'?'端末の設定に合わせます':t==='dark'?'ダークモードにしました':'ライトモードにしました');}
+try{THEME=localStorage.getItem('kphoto-theme')||'auto'}catch(e){}
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme)}catch(e){}
+applyTheme();
 
 /* ---------- selection ---------- */
 function startSelect(view){SEL.on=true;SEL.view=view;SEL.ids.clear();refresh();drawSelbar();}
@@ -691,7 +885,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-sel]
   if(a==='end'){endSelect();refresh();return;}
   if(a==='all'){(LAST[SEL.view]||[]).forEach(id=>SEL.ids.add(id));refresh();drawSelbar();return;}
   if(!ids.length){toast('写真をタップして選んでください');return;}
-  if(a==='fav'||a==='unfav'){const list=ids.map(id=>MEDIA.get(id)).filter(Boolean);list.forEach(m=>m.fav=a==='fav');await putMediaMany(list);toast(a==='fav'?`${list.length}件を☆に追加しました`:`${list.length}件の☆を外しました`);refresh();drawSelbar();}
+  if(a==='fav'||a==='unfav'){const list=ids.map(id=>MEDIA.get(id)).filter(Boolean);list.forEach(m=>{m.fav=a==='fav';m.favAt=Date.now()});await putMediaMany(list);toast(a==='fav'?`${list.length}件を☆に追加しました`:`${list.length}件の☆を外しました`);refresh();drawSelbar();}
   if(a==='edit')openEdit(ids);
   if(a==='down')downloadMany(ids);
   if(a==='del'){if(await confirmBox(`${ids.length}件を削除しますか？`,'この端末のライブラリから完全に削除されます。元に戻せません。','削除する'))await removeMedia(ids);}
@@ -878,7 +1072,7 @@ $('#lightbox').addEventListener('click',async e=>{const a=e.target.closest('[dat
   if(a==='close')closeLB();
   if(a==='prev'){LB.i=(LB.i-1+LB.ids.length)%LB.ids.length;drawLB();}
   if(a==='next'){LB.i=(LB.i+1)%LB.ids.length;drawLB();}
-  if(a==='fav'){m.fav=!m.fav;await putMedia(m);toast(m.fav?'☆ My Collectionに追加しました':'My Collectionから外しました');drawLB();refresh();}
+  if(a==='fav'){m.fav=!m.fav;m.favAt=Date.now();await putMedia(m);toast(m.fav?'☆ My Collectionに追加しました':'My Collectionから外しました');drawLB();refresh();}
   if(a==='down'){const b=await getFile(m.id);if(b)await downloadBlob(b,fileNameOf(m));}
   if(a==='wall'){const b=await getFile(m.id);if(b){await setWallpaper(b);toast('壁紙に設定しました')}}
   if(a==='edit')openEdit([m.id]);
@@ -941,7 +1135,8 @@ async function saveAdd(){
   ADD.files.forEach(f=>URL.revokeObjectURL(f.url));ADD.files=[];ADD.saving=false;
   toast(fail?`${ok}件を保存、${fail}件は保存できませんでした（容量不足の可能性）`:`${ok}件をライブラリに保存しました`);
   const g=ADD.st.group;
-  F.library=Object.assign(blankF(),{group:ADD.st.cat==='chemi'?'':g,chemi:ADD.st.cat==='chemi'?ADD.st.chemi:'',member:ADD.st.cat==='member'?ADD.st.member:''});
+  const sc=ADD.st.cat;const cg=sc==='chemi'?(chemiGroups(C.get(ADD.st.chemi)||{memberIds:[]})[0]||g):g;
+  Object.assign(LIB,{mode:'browse',g:cg||'',sec:cg?sc:'',sub:sc==='member'?ADD.st.member:sc==='chemi'?ADD.st.chemi:'',kind:'all'});
   ADD.st.tags='';ADD.st.memo='';
   go('library');
 }
@@ -1000,6 +1195,11 @@ async function renderRoom(){
   let usage='';try{const e=await navigator.storage?.estimate?.();if(e)usage=`使用中 ${fmtSize(e.usage||0)} / 目安上限 ${fmtSize(e.quota||0)}`}catch(_){}
   root.innerHTML=`<div class="sec-h"><div><div class="eyebrow">PERSONALIZE</div><h2>My Room</h2></div></div>
   <div class="room-grid">
+   <div class="panel" style="display:flex;flex-direction:column;gap:12px">
+    <div class="sec-h"><h2 style="font-size:16px">表示モード</h2><span class="eyebrow">THEME</span></div>
+    <div class="seg" role="group" aria-label="表示モード">${[['auto','端末に合わせる'],['light','ライト'],['dark','ダーク']].map(([v,l])=>`<button class="${THEME===v?'on':''}" data-theme-set="${v}">${v==='light'?ic('sun'):v==='dark'?ic('moon'):''} ${l}</button>`).join('')}</div>
+    <p class="note" style="margin:0">右上の ${ic('moon')} ボタンでもすぐ切り替えられます。</p>
+   </div>
    <div class="panel" id="room-wall" style="display:flex;flex-direction:column;gap:14px">
     <div class="sec-h"><h2 style="font-size:16px">壁紙</h2><span class="eyebrow">WALLPAPER</span></div>
     <div class="wall-prev">${wu?`<img src="${wu}" alt="現在の壁紙">`:'初期デザイン（壁紙なし）'}</div>
@@ -1047,7 +1247,7 @@ async function exportAll(){
   if(!window.JSZip){toast('書き出しの準備ができていません');return;}
   const out=$('#bk-progress');const zip=new JSZip();const list=[...MEDIA.values()];
   const meta=list.map(m=>{const {thumb,...rest}=m;return rest});
-  zip.file('catalog.json',JSON.stringify(CAT));zip.file('media.json',JSON.stringify(meta));zip.file('settings.json',JSON.stringify(SET));
+  zip.file('catalog.json',JSON.stringify(CAT));zip.file('media.json',JSON.stringify(meta));zip.file('settings.json',JSON.stringify(SET));ICONS.forEach((b,k)=>zip.file(`icons/${encodeURIComponent(k)}.jpg`,b));
   let i=0;for(const m of list){const b=await getFile(m.id);if(b)zip.file(`files/${m.id}`,b);if(m.thumb)zip.file(`thumbs/${m.id}.jpg`,m.thumb);i++;if(out)out.textContent=`${i} / ${list.length} 件を準備中…`;}
   const wall=await getMeta('wallpaper').catch(()=>null);if(wall)zip.file('wallpaper.jpg',wall);
   if(out)out.textContent='ZIPを作成中…';
@@ -1066,6 +1266,7 @@ async function importAll(file){
       const fz=zip.file(`files/${m.id}`);if(!fz)continue;const blob=new Blob([await fz.async('arraybuffer')],{type:m.mime||''});
       const tz=zip.file(`thumbs/${m.id}.jpg`);m.thumb=tz?new Blob([await tz.async('arraybuffer')],{type:'image/jpeg'}):null;
       await saveItem(m,blob);MEDIA.set(m.id,m);n++;}
+    const ifs=[];zip.forEach((p,f)=>{if(p.startsWith('icons/')&&!f.dir)ifs.push([p,f])});for(const [p,f] of ifs){const k=decodeURIComponent(p.slice(6).replace(/\.jpg$/,''));if(!ICONS.has(k))ICONS.set(k,new Blob([await f.async('arraybuffer')],{type:'image/jpeg'}))}if(ifs.length)await saveIcons();
     const wz=zip.file('wallpaper.jpg');if(wz&&!(await getMeta('wallpaper').catch(()=>null))){const w=new Blob([await wz.async('arraybuffer')],{type:'image/jpeg'});await putMeta('wallpaper',w);showWall(w);}
     if(out)out.textContent=`${n}件を読み込みました`;toast(`バックアップから${n}件を復元しました`);renderRoom();
   }catch(e){console.error(e);if(out)out.textContent='このファイルは読み込めませんでした。KPhotoで書き出したZIPを選んでください。';}
@@ -1079,7 +1280,9 @@ document.addEventListener('click',async e=>{
   if(a==='reset-filters'){const v=VIEW;F[v]=Object.assign(blankF(),{open:F[v].open});renderGridView(v);return;}
   if(a==='more'){SHOWN[b.dataset.view]+=120;renderGridView(b.dataset.view);return;}
   if(a==='toggle-select'){SEL.on?(endSelect(),refresh()):startSelect(VIEW);return;}
-  if(a==='open-group'){F.library=Object.assign(blankF(),{group:b.dataset.id});go('library');return;}
+  if(a==='open-group'){LIB.mode='browse';LIB.g=b.dataset.id;LIB.sec='';LIB.sub='';go('library');try{history.pushState({lib:{...LIB}},'','#library')}catch(_){}return;}
+  if(a==='go-search'){LIB.mode='search';go('library',{focus:'q'});return;}
+  if(a==='toggle-theme'){const dark=document.documentElement.getAttribute('data-theme')==='dark'||(!document.documentElement.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme: dark)').matches);setTheme(dark?'light':'dark');return;}
   if(a==='new-group'){openGroupModal(null);return;}
   if(a==='edit-group'){openGroupModal(b.dataset.id);return;}
   if(a==='new-chemi'){openChemiModal(null);return;}
@@ -1091,6 +1294,7 @@ document.addEventListener('click',async e=>{
   if(a==='export'){exportAll();return;}
   if(a==='import'){$('#hidden-import-input').click();return;}
 });
+document.addEventListener('click',e=>{const t=e.target.closest('[data-theme-set]');if(t)setTheme(t.dataset.themeSet);});
 document.addEventListener('click',async e=>{const p=e.target.closest('[data-preset]');if(!p)return;const pr=PRESET_GROUPS.find(x=>x[0]===p.dataset.preset);if(!pr)return;
   CAT.groups.push({id:uid(),name:pr[0],agency:pr[1],gen:pr[2],color:COLORS[CAT.groups.length%COLORS.length]});if(!CAT.agencies.includes(pr[1]))CAT.agencies.push(pr[1]);await saveCat();toast(`${pr[0]}を追加しました`);renderRoom();});
 
@@ -1130,7 +1334,7 @@ async function boot(){
       const s=await getMeta('settings');if(s)SET=Object.assign(SET,s);
       const list=await getAllMedia();(list||[]).forEach(m=>MEDIA.set(m.id,m));
       const w=await getMeta('wallpaper');if(w)showWall(w);}catch(e){console.error(e)}}
-  indexCat();applySettings();
+  indexCat();applySettings();await loadIcons();
   try{await migrateOld()}catch(e){console.error(e)}
   const h=(location.hash||'').replace('#','');go(TABS.some(t=>t[0]===h)?h:'home');
   if(!db){const w=document.createElement('div');w.className='warn';w.textContent='このブラウザでは保存機能が使えないため、ページを閉じると内容が消えます（プライベートブラウズを解除すると保存できます）。';$('#app').prepend(w);}
