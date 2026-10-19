@@ -1,6 +1,6 @@
 {
-  "name": "MY K-POP ROOM",
-  "short_name": "K-POP ROOM",
+  "name": "KPhoto",
+  "short_name": "KPhoto",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
