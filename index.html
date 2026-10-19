@@ -240,6 +240,9 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 @media (min-width:700px){.pgrid{grid-template-columns:repeat(8,minmax(0,1fr))}}
 .pitem{position:relative;aspect-ratio:1;max-width:100%;border-radius:9px;overflow:hidden;background:var(--lilac-soft)}
 .pitem img,.pitem video{width:100%;height:100%;object-fit:cover}
+.pitem .pinner{position:absolute;inset:0;display:block}
+.pitem .pinner img{width:100%;height:100%;object-fit:cover}
+.pitem .pph{position:absolute;inset:0;display:grid;place-items:center;font-size:10px;color:var(--muted);padding:4px;text-align:center;word-break:break-all}
 .pitem .rm{position:absolute;right:3px;top:3px;width:22px;height:22px;border-radius:50%;border:0;background:rgba(10,12,25,.6);color:#fff;font-size:13px;line-height:1;padding:0}
 .pitem .k{position:absolute;left:4px;bottom:4px;font-size:10px;background:rgba(10,12,25,.55);color:#fff;border-radius:5px;padding:0 5px}
 .add-layout{display:grid;gap:16px}
@@ -584,7 +587,9 @@ async function makeThumb(file,kind){
     if(!w||!h)return null;
     const s=Math.min(1,560/Math.max(w,h));const c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*s));c.height=Math.max(1,Math.round(h*s));
     c.getContext('2d').drawImage(src,0,0,c.width,c.height);
-    return await new Promise(r=>c.toBlob(r,'image/jpeg',.84));
+    const out=await new Promise(r=>c.toBlob(r,'image/jpeg',.84));
+    c.width=c.height=0;if(kind==='video'){try{src.removeAttribute('src');src.load()}catch(_){}}else{src.src=''}
+    return out;
   }catch(e){return null}finally{URL.revokeObjectURL(url)}
 }
 function kindOf(file){const t=file.type||'';if(t.startsWith('video/'))return 'video';if(t.startsWith('image/'))return 'photo';const e=(file.name.split('.').pop()||'').toLowerCase();if(['mp4','mov','m4v','webm','avi','mkv'].includes(e))return 'video';if(['jpg','jpeg','png','gif','webp','heic','heif','avif','bmp'].includes(e))return 'photo';return null;}
@@ -1253,7 +1258,7 @@ function renderAdd(){
     </div>
    </div>`;
   ADD.form=mountTagForm($('#add-form'),ADD.st,{prefix:'add'});
-  drawAddPreview();
+  drawAddPreview();pumpThumbs();
   const input=$('#add-input'),drop=$('#drop');
   input.addEventListener('change',()=>{addFiles([...input.files]);input.value='';});
   ['dragenter','dragover'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add('over')}));
@@ -1264,8 +1269,9 @@ function renderAdd(){
   $('#paste-btn').addEventListener('click',pasteFromClipboard);
   pb.addEventListener('drop',e=>{e.preventDefault();addFiles([...(e.dataTransfer?.files||[])]);});
   $('#add-save').addEventListener('click',saveAdd);
-  $('#add-preview').addEventListener('click',e=>{const r=e.target.closest('[data-rm]');if(r){const i=+r.dataset.rm;URL.revokeObjectURL(ADD.files[i].url);ADD.files.splice(i,1);drawAddPreview();return;}
-    if(e.target.closest('[data-act="clear-add"]')){ADD.files.forEach(f=>URL.revokeObjectURL(f.url));ADD.files=[];drawAddPreview();}});
+  $('#add-preview').addEventListener('click',e=>{if(ADD.saving)return;const r=e.target.closest('[data-rm]');if(r){const i=ADD.files.findIndex(f=>f.key===r.dataset.rm);if(i>=0)ADD.files.splice(i,1);drawAddPreview();return;}
+    if(e.target.closest('[data-act="clear-add"]')){ADD.files=[];drawAddPreview();}
+    if(e.target.closest('[data-act="show-all-add"]')){ADD.showAll=true;drawAddPreview();}});
 }
 function resetPasteBox(){const pb=$('#pastebox');if(pb)pb.innerHTML='';}
 function pasteName(type,i){const d=new Date(),p=n=>String(n).padStart(2,'0');const ext=(type.split('/')[1]||'png').replace('jpeg','jpg').replace('quicktime','mov').replace(/\+.*$/,'');return `paste_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}_${i+1}.${ext}`;}
@@ -1334,29 +1340,68 @@ async function handlePaste(e){
   const got=await filesFromSrcs(srcs);if(got.length)takeFiles(got);else toast(PASTE_FAIL);
 }
 document.addEventListener('paste',handlePaste);
-function addFiles(files){let skipped=0;files.forEach(f=>{const k=kindOf(f);if(!k){skipped++;return}ADD.files.push({file:f,kind:k,url:URL.createObjectURL(f)})});if(skipped)toast(`${skipped}件は写真・動画ではないため除きました`);drawAddPreview();}
-function drawAddPreview(){const el=$('#add-preview');if(!el)return;
-  if(!ADD.files.length){el.innerHTML='';const sb=$('#add-save');if(sb){sb.disabled=true;sb.innerHTML=`${ic('check')}ライブラリに保存`;}return;}
-  const total=ADD.files.reduce((s,f)=>s+f.file.size,0);
-  el.innerHTML=`<div class="resline" style="margin-bottom:8px"><span><b>${ADD.files.length}</b> 件選択中（${fmtSize(total)}）</span><span class="sp"><button class="btn sm ghost" data-act="clear-add">すべて外す</button></span></div>
-   <div class="pgrid">${ADD.files.map((f,i)=>`<div class="pitem">${f.kind==='video'?`<video src="${f.url}" muted playsinline preload="metadata"></video><span class="k">動画</span>`:`<img src="${f.url}" alt="">`}<button class="rm" data-rm="${i}" aria-label="外す">×</button></div>`).join('')}</div>`;
-  $('#add-save').disabled=false;$('#add-save').innerHTML=`${ic('check')}${ADD.files.length}件をライブラリに保存`;
+const PREVIEW_MAX=60;
+function addFiles(files){let skipped=0;
+  files.forEach(f=>{const k=kindOf(f);if(!k){skipped++;return}ADD.files.push({file:f,kind:k,key:uid(),thumb:undefined,tp:null})});
+  if(skipped)toast(`${skipped}件は写真・動画ではないため除きました`);
+  if(ADD.files.length>PREVIEW_MAX)ADD.showAll=false;
+  drawAddPreview();pumpThumbs();}
+function thumbOf(f){if(!f.tp)f.tp=makeThumb(f.file,f.kind).then(t=>{f.thumb=t;f.turl=t?URL.createObjectURL(t):null;return t});return f.tp;}
+let thumbPumping=false;
+async function pumpThumbs(){
+  if(thumbPumping)return;thumbPumping=true;
+  try{for(let i=0;i<ADD.files.length;i++){
+      if(VIEW!=='add'&&!ADD.saving)break;
+      const f=ADD.files[i];if(f.tp)continue;
+      if(i>=(ADD.showAll?ADD.files.length:PREVIEW_MAX)&&!ADD.saving)break; // only make previews for what is visible
+      await thumbOf(f);
+      const el=document.querySelector(`[data-pkey="${f.key}"]`);if(el)el.innerHTML=previewInner(f);
+      await new Promise(r=>setTimeout(r,0));
+  }}finally{thumbPumping=false}
 }
+function previewInner(f){return `${f.turl?`<img src="${f.turl}" alt="">`:`<span class="pph">${f.tp?(f.thumb===null?esc((f.file.name||'').slice(-12)):'…'):'…'}</span>`}${f.kind==='video'?'<span class="k">動画</span>':''}`}
+function drawAddPreview(){const el=$('#add-preview');if(!el)return;
+  const sb=$('#add-save');
+  if(!ADD.files.length){el.innerHTML='';if(sb){sb.disabled=true;sb.innerHTML=`${ic('check')}ライブラリに保存`;}return;}
+  const total=ADD.files.reduce((s,f)=>s+f.file.size,0);
+  const show=ADD.showAll?ADD.files:ADD.files.slice(0,PREVIEW_MAX);
+  el.innerHTML=`<div class="resline" style="margin-bottom:8px"><span><b>${ADD.files.length}</b> 件選択中（${fmtSize(total)}）</span><span class="sp"><button class="btn sm ghost" data-act="clear-add">すべて外す</button></span></div>
+   <div class="pgrid">${show.map(f=>`<div class="pitem"><span class="pinner" data-pkey="${f.key}">${previewInner(f)}</span><button class="rm" data-rm="${f.key}" aria-label="外す">×</button></div>`).join('')}</div>
+   ${ADD.files.length>show.length?`<div style="text-align:center;margin-top:8px"><button class="btn sm" data-act="show-all-add">ほか ${ADD.files.length-show.length}件も表示</button></div>`:''}`;
+  if(sb){sb.disabled=false;sb.innerHTML=`${ic('check')}${ADD.files.length}件をライブラリに保存`;}
+}
+let wakeLock=null;
+async function keepAwake(on){try{if(on){if('wakeLock' in navigator)wakeLock=await navigator.wakeLock.request('screen');}else if(wakeLock){await wakeLock.release();wakeLock=null;}}catch(e){}}
 async function saveAdd(){
   if(ADD.saving||!ADD.files.length)return;
   const err=validateTag(ADD.st);if(err){toast(err);return;}
+  const total=ADD.files.reduce((s,f)=>s+f.file.size,0);
+  try{const est=await navigator.storage?.estimate?.();if(est&&est.quota&&est.quota-est.usage<total*1.15){
+    if(!await confirmBox('保存できる容量が足りないかもしれません',`選んだファイルは合計 ${fmtSize(total)} ですが、このブラウザで使える残りは約 ${fmtSize(Math.max(0,est.quota-est.usage))} です。途中で止まった場合、保存できなかった分はこの画面に残ります。`,'このまま保存する'))return;}}catch(_){}
   ADD.saving=true;const btn=$('#add-save');btn.disabled=true;
-  try{navigator.storage?.persist?.()}catch(e){}
+  try{await navigator.storage?.persist?.()}catch(e){}
+  keepAwake(true);
   const prog=$('#add-progress');prog.hidden=false;const bar=$('#add-progress i'),pt=$('#add-ptext');
-  const n=ADD.files.length;let ok=0,fail=0;const base=Date.now();
-  for(let i=0;i<n;i++){const f=ADD.files[i];pt.textContent=`${i+1} / ${n} 件を保存中…`;
-    try{const thumb=await makeThumb(f.file,f.kind);
+  const list=[...ADD.files];const n=list.length;let ok=0;const failed=[];let quota=false;const base=Date.now();
+  for(let i=0;i<n;i++){const f=list[i];
+    pt.textContent=`${i+1} / ${n} 件を保存中…　保存が終わるまで、この画面を開いたままにしてください`;
+    try{const thumb=await thumbOf(f);
       const m={id:uid(),kind:f.kind,cat:'group',groupIds:[],memberIds:[],chemiId:null,tags:[],memo:'',fav:false,added:base+i,name:f.file.name,mime:f.file.type,size:f.file.size,taken:f.file.lastModified||null,thumb};
       applyTag(m,ADD.st,false);await saveItem(m,f.file);MEDIA.set(m.id,m);ok++;
-    }catch(e){fail++;console.error(e)}
-    bar.style.width=`${Math.round((i+1)/n*100)}%`;}
-  ADD.files.forEach(f=>URL.revokeObjectURL(f.url));ADD.files=[];ADD.saving=false;
-  toast(fail?`${ok}件を保存、${fail}件は保存できませんでした（容量不足の可能性）`:`${ok}件をライブラリに保存しました`);
+      if(f.turl){URL.revokeObjectURL(f.turl);f.turl=null}
+      ADD.files=ADD.files.filter(x=>x!==f);
+    }catch(e){console.error(e);failed.push(f);if(e&&(e.name==='QuotaExceededError'||/quota/i.test(e.message||''))){quota=true;break;}}
+    bar.style.width=`${Math.round((i+1)/n*100)}%`;
+    if(i%10===9){const sb=$('#add-save');if(sb)sb.innerHTML=`${ic('check')}${ADD.files.length}件をライブラリに保存`;}
+    await new Promise(r=>setTimeout(r,0));
+  }
+  ADD.saving=false;keepAwake(false);
+  if(ADD.files.length){
+    prog.hidden=true;bar.style.width='0';
+    toast(quota?`${ok}件を保存しました。容量がいっぱいで残り${ADD.files.length}件は保存できませんでした`:`${ok}件を保存しました。${ADD.files.length}件は保存できなかったので、もう一度「保存」を押してください`);
+    drawAddPreview();return;
+  }
+  toast(`${ok}件をライブラリに保存しました`);
   const g=ADD.st.group;
   const sc=ADD.st.cat;const cg=sc==='chemi'?(chemiGroups(C.get(ADD.st.chemi)||{memberIds:[]})[0]||g):g;
   Object.assign(LIB,{mode:'browse',g:cg||'',sec:cg?sc:'',b:sc==='member'?'m:'+ADD.st.member:sc==='chemi'?'c:'+ADD.st.chemi:'',s:ADD.st.sub||'',kind:'all'});ADD.st.sub='';
