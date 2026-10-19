@@ -1336,7 +1336,7 @@ async function handlePaste(e){
 document.addEventListener('paste',handlePaste);
 function addFiles(files){let skipped=0;files.forEach(f=>{const k=kindOf(f);if(!k){skipped++;return}ADD.files.push({file:f,kind:k,url:URL.createObjectURL(f)})});if(skipped)toast(`${skipped}件は写真・動画ではないため除きました`);drawAddPreview();}
 function drawAddPreview(){const el=$('#add-preview');if(!el)return;
-  if(!ADD.files.length){el.innerHTML='';$('#add-save')&&($('#add-save').disabled=true);return;}
+  if(!ADD.files.length){el.innerHTML='';const sb=$('#add-save');if(sb){sb.disabled=true;sb.innerHTML=`${ic('check')}ライブラリに保存`;}return;}
   const total=ADD.files.reduce((s,f)=>s+f.file.size,0);
   el.innerHTML=`<div class="resline" style="margin-bottom:8px"><span><b>${ADD.files.length}</b> 件選択中（${fmtSize(total)}）</span><span class="sp"><button class="btn sm ghost" data-act="clear-add">すべて外す</button></span></div>
    <div class="pgrid">${ADD.files.map((f,i)=>`<div class="pitem">${f.kind==='video'?`<video src="${f.url}" muted playsinline preload="metadata"></video><span class="k">動画</span>`:`<img src="${f.url}" alt="">`}<button class="rm" data-rm="${i}" aria-label="外す">×</button></div>`).join('')}</div>`;
