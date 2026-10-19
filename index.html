@@ -254,7 +254,8 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .room-grid{display:grid;gap:16px}
 @media (min-width:900px){.room-grid{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}}
 .wall-prev{aspect-ratio:16/9;max-width:100%;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--line);background:var(--lilac-soft);display:grid;place-items:center;color:var(--muted);font-size:13px}
-.wall-prev img{width:100%;height:100%;object-fit:cover}
+.wall-prev{position:relative}
+.wall-prev img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .glist{display:flex;flex-direction:column;gap:8px}
 .grow{border:1px solid var(--line);background:var(--glass-strong);border-radius:var(--r-md);padding:10px 12px;display:flex;flex-direction:column;gap:6px}
 .grow-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -415,6 +416,15 @@ details.presets summary{cursor:pointer;font-size:13px;font-weight:700;color:var(
 .subhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .subhead h2{font-family:var(--display);font-style:italic;font-weight:800;font-size:clamp(24px,7vw,34px)}
 .subhead .btn{margin-left:auto}
+.crop-wrap{display:flex;gap:14px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
+.crop-main{position:relative;overflow:hidden;border-radius:16px;background:var(--lilac-soft);touch-action:none;cursor:grab;box-shadow:var(--shadow-sm),inset 0 0 0 1px var(--line);flex:none;max-width:100%}
+.crop-main:active{cursor:grabbing}
+.crop-main img,.crop-prev img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;-webkit-user-drag:none;user-select:none}
+.crop-main .grid{position:absolute;inset:0;pointer-events:none;background:linear-gradient(rgba(255,255,255,.55),rgba(255,255,255,.55)) 33.33% 0/1px 100% no-repeat,linear-gradient(rgba(255,255,255,.55),rgba(255,255,255,.55)) 66.66% 0/1px 100% no-repeat,linear-gradient(rgba(255,255,255,.55),rgba(255,255,255,.55)) 0 33.33%/100% 1px no-repeat,linear-gradient(rgba(255,255,255,.55),rgba(255,255,255,.55)) 0 66.66%/100% 1px no-repeat}
+.crop-side{display:flex;flex-direction:column;gap:10px;align-items:center}
+.crop-prev{position:relative;overflow:hidden;border-radius:12px;background:var(--lilac-soft);box-shadow:inset 0 0 0 1px var(--line)}
+.crop-side small{font-size:11px;color:var(--muted);margin-top:-6px}
+.crop-main+small{display:block;text-align:center}
 #toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:13.5px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100% - 32px)}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .warn{background:var(--accent-soft);color:var(--ink);border-radius:12px;padding:10px 14px;font-size:13px}
@@ -769,7 +779,10 @@ function bindFilters(){
 }
 
 /* ---------- icons ---------- */
-async function loadIcons(){try{const o=await getMeta('icons');ICONS=new Map(Object.entries(o||{}))}catch(e){ICONS=new Map()}}
+const icoRec=v=>v instanceof Blob?{blob:v,x:50,y:50,z:1}:v;
+async function loadIcons(){try{const o=await getMeta('icons');ICONS=new Map(Object.entries(o||{}).map(([k,v])=>[k,icoRec(v)]).filter(([k,v])=>v&&v.blob))}catch(e){ICONS=new Map()}}
+const posStyle=p=>p?`object-position:${p.x}% ${p.y}%;transform:scale(${p.z});transform-origin:${p.x}% ${p.y}%`:'';
+const icoStyle=key=>ICONS.has(key)?posStyle(ICONS.get(key)):'';
 async function saveIcons(){try{await putMeta('icons',Object.fromEntries(ICONS))}catch(e){}}
 function scopeList(key){
   const [t,id,sec]=key.split(':');const all=[...MEDIA.values()];const inG=m=>(m.groupIds||[]).includes(id);
@@ -782,38 +795,69 @@ function scopeList(key){
   return l.sort((a,b)=>b.added-a.added);
 }
 function iconURL(key){
-  const b=ICONS.get(key);
-  if(b){let u=iconUrlCache.get(key);if(!u){u=URL.createObjectURL(b);iconUrlCache.set(key,u)}return u;}
+  const rec=ICONS.get(key);
+  if(rec){let u=iconUrlCache.get(key);if(!u){u=URL.createObjectURL(rec.blob);iconUrlCache.set(key,u)}return u;}
   const l=scopeList(key);const [t]=key.split(':');
   const pick=(t==='m'?l.find(m=>m.cat==='member'&&m.thumb):null)||(t==='g'?l.find(m=>m.cat==='group'&&m.thumb):null)||l.find(m=>m.thumb);
   return pick?thumbURL(pick):null;
 }
 function iconHTML(key,label,{round=false,fallback=''}={}){
   const u=iconURL(key);
-  return `<span class="ico ${round?'round':''}">${u?`<img src="${u}" alt="">`:(fallback||esc(String(label||'?').replace(/\s+/g,'').slice(0,2).toUpperCase()))}</span>`;
+  return `<span class="ico ${round?'round':''}">${u?`<img src="${u}" alt="" style="${icoStyle(key)}">`:(fallback||esc(String(label||'?').replace(/\s+/g,'').slice(0,2).toUpperCase()))}</span>`;
 }
-async function squareIcon(blob){
+async function prepSource(blob,max=1600){
   const u=URL.createObjectURL(blob);
-  try{const img=await loadImg(u);const s=Math.min(img.naturalWidth,img.naturalHeight);if(!s)return null;
-    const c=document.createElement('canvas');c.width=c.height=360;
-    c.getContext('2d').drawImage(img,(img.naturalWidth-s)/2,(img.naturalHeight-s)/2,s,s,0,0,360,360);
-    return await new Promise(r=>c.toBlob(r,'image/jpeg',.88));
+  try{const img=await loadImg(u);const w=img.naturalWidth,h=img.naturalHeight;if(!w||!h)return null;
+    const sc=Math.min(1,max/Math.max(w,h));const c=document.createElement('canvas');c.width=Math.round(w*sc);c.height=Math.round(h*sc);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);const out=await new Promise(r=>c.toBlob(r,'image/jpeg',.9));c.width=c.height=0;return out;
   }catch(e){return null}finally{URL.revokeObjectURL(u)}
 }
-async function setIcon(key,blob){const old=iconUrlCache.get(key);if(old){URL.revokeObjectURL(old);iconUrlCache.delete(key)}
-  if(blob)ICONS.set(key,blob);else ICONS.delete(key);await saveIcons();refresh();}
+async function setIcon(key,rec){const old=iconUrlCache.get(key);if(old){URL.revokeObjectURL(old);iconUrlCache.delete(key)}
+  if(rec)ICONS.set(key,rec);else ICONS.delete(key);await saveIcons();refresh();}
+const ICON_FRAMES=[{label:'カード',r:1,w:260},{label:'開いたときの表紙',r:1.6,w:150},{label:'サブボード',r:.87,w:80}];
+const WALL_FRAMES=[{label:'スマホ',r:9/19.5,w:170},{label:'パソコン',r:1.6,w:170}];
+/* position / zoom editor shared by covers and the wallpaper */
+function openCropper({blob,pos,frames,title,onSave}){
+  const p={x:50,y:50,z:1,...(pos||{})};const url=URL.createObjectURL(blob);
+  const fr=(f,cls)=>`<div class="${cls}" style="width:${f.w}px;aspect-ratio:${f.r}"><img src="${url}" alt="" draggable="false">${cls==='crop-main'?'<div class="grid"></div>':''}</div>`;
+  const m=openModal(`<h3>${esc(title||'位置と大きさを調整')}</h3>
+   <p class="note" style="margin:0">写真をドラッグして見せたい部分を合わせ、下のスライダーで拡大できます。</p>
+   <div class="crop-wrap"><div>${fr(frames[0],'crop-main')}<small class="muted" style="font-size:11px">${esc(frames[0].label)}</small></div>
+     <div class="crop-side">${frames.slice(1).map(f=>fr(f,'crop-prev')+`<small>${esc(f.label)}</small>`).join('')}</div></div>
+   <div class="field"><label for="crop-z">拡大 <span class="muted" id="crop-zv"></span></label><input type="range" id="crop-z" min="1" max="3" step="0.01" value="${p.z}"></div>
+   <div class="acts"><button class="btn ghost" data-a="reset" style="margin-right:auto">中央に戻す</button><button class="btn" data-a="c">キャンセル</button><button class="btn primary" data-a="s">決定</button></div>`);
+  const imgs=$$('.crop-main img,.crop-prev img',m);const main=$('.crop-main',m);
+  const apply=()=>{imgs.forEach(im=>im.style.cssText=posStyle(p));$('#crop-zv',m).textContent=Math.round(p.z*100)+'%';};
+  apply();
+  let drag=null;
+  main.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,px:p.x,py:p.y};main.setPointerCapture(e.pointerId);e.preventDefault();});
+  main.addEventListener('pointermove',e=>{if(!drag)return;const r=main.getBoundingClientRect();const k=1.6/p.z;
+    p.x=Math.max(0,Math.min(100,drag.px-(e.clientX-drag.x)/r.width*100*k));p.y=Math.max(0,Math.min(100,drag.py-(e.clientY-drag.y)/r.height*100*k));apply();});
+  const end=()=>{drag=null};main.addEventListener('pointerup',end);main.addEventListener('pointercancel',end);
+  main.addEventListener('wheel',e=>{e.preventDefault();p.z=Math.max(1,Math.min(3,p.z-e.deltaY*.002));$('#crop-z',m).value=p.z;apply();},{passive:false});
+  $('#crop-z',m).addEventListener('input',e=>{p.z=+e.target.value;apply();});
+  m.addEventListener('click',async e=>{const a=e.target.closest('[data-a]')?.dataset.a;if(!a)return;
+    if(a==='reset'){p.x=50;p.y=50;p.z=1;$('#crop-z',m).value=1;apply();return;}
+    closeModal();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    if(a==='s')await onSave({x:Math.round(p.x*10)/10,y:Math.round(p.y*10)/10,z:Math.round(p.z*100)/100});});
+}
 function openIconModal(key,title){
-  const l=scopeList(key).filter(m=>m.thumb).slice(0,80);const has=ICONS.has(key);
-  const m=openModal(`<h3>${esc(title)}のアイコン</h3>
+  const l=scopeList(key).filter(m=>m.thumb).slice(0,80);const rec=ICONS.get(key);
+  const m=openModal(`<h3>${esc(title)}の表紙</h3>
    <div class="icon-prev">${iconHTML(key,title,{round:key.startsWith('m:')})}</div>
-   <div class="btn-row" style="justify-content:center"><label class="btn primary" for="icon-file">${ic('image')}端末の写真から選ぶ</label>${has?`<button class="btn ghost" data-a="clear">設定を外す</button>`:''}
+   <div class="btn-row" style="justify-content:center"><label class="btn primary" for="icon-file">${ic('image')}端末の写真から選ぶ</label>${rec?`<button class="btn" data-a="adjust">${ic('edit')}位置を調整</button><button class="btn ghost" data-a="clear">設定を外す</button>`:''}
     <input type="file" id="icon-file" accept="image/*" hidden></div>
-   ${l.length?`<div class="flabel">保存済みの写真から選ぶ</div><div class="iconpick">${l.map(x=>`<button type="button" data-pick="${x.id}" aria-label="この写真をアイコンにする"><img src="${thumbURL(x)}" alt=""></button>`).join('')}</div>`:'<p class="note" style="margin:0">写真を追加すると、ここから選べるようになります。</p>'}
-   <p class="note" style="margin:0">${has?'':'未設定のあいだは、いちばん新しい写真が自動でアイコンになります。'}写真は正方形に切り取られます。</p>
+   ${l.length?`<div class="flabel">保存済みの写真から選ぶ</div><div class="iconpick">${l.map(x=>`<button type="button" data-pick="${x.id}" aria-label="この写真を表紙にする"><img src="${thumbURL(x)}" alt=""></button>`).join('')}</div>`:'<p class="note" style="margin:0">写真を追加すると、ここから選べるようになります。</p>'}
+   <p class="note" style="margin:0">${rec?'':'未設定のあいだは、いちばん新しい写真が自動で表紙になります。'}選んだあとに、写真の位置と大きさを調整できます。</p>
    <div class="acts"><button class="btn" data-a="close">閉じる</button></div>`);
-  $('#icon-file',m).addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;const b=await squareIcon(f);if(!b){toast('この画像は読み込めませんでした');return}await setIcon(key,b);closeModal();toast('アイコンを設定しました');});
-  m.addEventListener('click',async e=>{const p=e.target.closest('[data-pick]');if(p){const x=MEDIA.get(p.dataset.pick);const b=x&&x.thumb?await squareIcon(x.thumb):null;if(b){await setIcon(key,b);closeModal();toast('アイコンを設定しました')}return;}
-    const a=e.target.closest('[data-a]')?.dataset.a;if(a==='close')closeModal();if(a==='clear'){await setIcon(key,null);closeModal();toast('アイコンの設定を外しました')}});
+  const edit=async(src,pos)=>{if(!src){toast('この画像は読み込めませんでした');return;}
+    openCropper({blob:src,pos,frames:ICON_FRAMES,title:`${title}の表紙を調整`,onSave:async q=>{closeModal();await setIcon(key,{blob:src,...q});toast('表紙を設定しました');}});};
+  $('#icon-file',m).addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;edit(await prepSource(f));});
+  m.addEventListener('click',async e=>{
+    const p=e.target.closest('[data-pick]');if(p){const x=MEDIA.get(p.dataset.pick);if(!x)return;let b=x.kind==='photo'?await getFile(x.id):null;edit(await prepSource(b||x.thumb));return;}
+    const a=e.target.closest('[data-a]')?.dataset.a;if(a==='close')closeModal();
+    if(a==='adjust'&&rec)openCropper({blob:rec.blob,pos:rec,frames:ICON_FRAMES,title:`${title}の表紙を調整`,onSave:async q=>{closeModal();await setIcon(key,{blob:rec.blob,...q});toast('表紙を調整しました');}});
+    if(a==='clear'){await setIcon(key,null);closeModal();toast('表紙の設定を外しました')}});
 }
 
 /* ---------- library: Pinterest-style boards ---------- */
@@ -828,11 +872,11 @@ function boardList(key){
 }
 const subsOf=owner=>CAT.subs.filter(x=>x.owner===owner);
 function relTime(ts){if(!ts)return '';const d=Math.floor((Date.now()-ts)/86400000);if(d<1)return '今日';if(d<2)return '昨日';if(d<30)return d+'日前';if(d<365)return Math.floor(d/30)+'か月前';return Math.floor(d/365)+'年前';}
-function coverURLs(key,list,n){const urls=[];if(ICONS.has(key))urls.push(iconURL(key));for(const m of list){if(urls.length>=n)break;if(!m.thumb)continue;const u=thumbURL(m);if(!urls.includes(u))urls.push(u);}return urls;}
+function coverURLs(key,list,n){const urls=[];if(ICONS.has(key))urls.push({u:iconURL(key),st:icoStyle(key)});for(const m of list){if(urls.length>=n)break;if(!m.thumb)continue;const u=thumbURL(m);if(!urls.some(x=>x.u===u))urls.push({u,st:''});}return urls;}
 function boardCardHTML(key,title,emoji,list,attrs,{layout='big',meta='',edit=false}={}){
   const urls=coverURLs(key.startsWith('G:')?'g:'+key.slice(2):key,list,3);
   const init=esc(String(title||'?').replace(/\s+/g,'').slice(0,2).toUpperCase());
-  const slots=[0,1,2].map(i=>`<span>${urls[i]?`<img src="${urls[i]}" alt="" loading="lazy">`:(i===0&&!urls.length?init:'')}</span>`).join('');
+  const slots=[0,1,2].map(i=>`<span>${urls[i]?`<img src="${urls[i].u}" alt="" loading="lazy" style="${urls[i].st}">`:(i===0&&!urls.length?init:'')}</span>`).join('');
   const last=list[0]?.added;
   return `<div class="board" role="button" tabindex="0" ${attrs}>${edit?`<button class="edit" data-icon="${esc(key)}" data-title="${esc(title)}" aria-label="${esc(title)}の表紙を変更">${ic('camera')}</button>`:''}
     <div class="collage ${layout}">${slots}</div><h4>${esc(title)}${emoji?' '+esc(emoji):''}</h4><small>${meta||`写真 ${list.length}件`}${last?`・${relTime(last)}`:''}</small></div>`;
@@ -840,7 +884,7 @@ function boardCardHTML(key,title,emoji,list,attrs,{layout='big',meta='',edit=fal
 function addBoardHTML(label,attrs,layout='big'){return `<div class="board" role="button" tabindex="0" ${attrs}><div class="collage add ${layout}">${ic('plus')}</div><h4>${label}</h4><small>&nbsp;</small></div>`;}
 function heroHTML(key,title,emoji,meta,desc,editAttrs){
   const u=iconURL(key);
-  return `<div class="bhero"><div class="cover">${u?`<img src="${u}" alt="">`:esc(String(title).replace(/\s+/g,'').slice(0,2).toUpperCase())}
+  return `<div class="bhero"><div class="cover">${u?`<img src="${u}" alt="" style="${icoStyle(key)}">`:esc(String(title).replace(/\s+/g,'').slice(0,2).toUpperCase())}
      <div class="acts"><button data-icon="${esc(key)}" data-title="${esc(title)}" aria-label="表紙を変更">${ic('camera')}</button><button ${editAttrs} aria-label="編集">${ic('edit')}</button></div></div>
     <h1>${esc(title)}${emoji?`<span class="emo">${esc(emoji)}</span>`:''}</h1><div class="meta">${meta}</div>
     ${desc?`<p class="desc clamp" id="bdesc">${esc(desc)}</p>${desc.length>60||desc.includes('\n')?`<button class="more-desc" data-moredesc="1">さらに表示</button>`:''}`:''}</div>`;
@@ -1229,7 +1273,7 @@ $('#lightbox').addEventListener('click',async e=>{const a=e.target.closest('[dat
   if(a==='next'){LB.i=(LB.i+1)%LB.ids.length;drawLB();}
   if(a==='fav'){m.fav=!m.fav;m.favAt=Date.now();await putMedia(m);toast(m.fav?'☆ My Collectionに追加しました':'My Collectionから外しました');drawLB();refresh();}
   if(a==='down'){const b=await getFile(m.id);if(b)await downloadBlob(b,fileNameOf(m));}
-  if(a==='wall'){const b=await getFile(m.id);if(b){await setWallpaper(b);toast('壁紙に設定しました')}}
+  if(a==='wall'){const b=await getFile(m.id);if(b){closeLB();await setWallpaper(b);}}
   if(a==='edit')openEdit([m.id]);
   if(a==='del'){if(await confirmBox('この写真を削除しますか？','この端末のライブラリから完全に削除されます。','削除する'))removeMedia([m.id]);}
 });
@@ -1458,20 +1502,23 @@ $('#v-home').addEventListener('click',e=>{if(!e.target.closest('#home-cal'))retu
 async function renderRoom(){
   const root=$('#v-room');
   const wall=await getMeta('wallpaper').catch(()=>null);const wu=wall?URL.createObjectURL(wall):null;
+  let persisted=false;try{persisted=await navigator.storage?.persisted?.()||false}catch(_){}
+  const sinceBackup=SET.lastBackup?[...MEDIA.values()].filter(m=>m.added>SET.lastBackup).length:0;
   let usage='';try{const e=await navigator.storage?.estimate?.();if(e)usage=`使用中 ${fmtSize(e.usage||0)} / 目安上限 ${fmtSize(e.quota||0)}`}catch(_){}
   root.innerHTML=`<div class="sec-h"><div><div class="eyebrow">PERSONALIZE</div><h2>My Room</h2></div></div>
   <div class="room-grid">
    <div class="panel" id="room-wall" style="display:flex;flex-direction:column;gap:14px">
     <div class="sec-h"><h2 style="font-size:16px">壁紙</h2><span class="eyebrow">WALLPAPER</span></div>
-    <div class="wall-prev">${wu?`<img src="${wu}" alt="現在の壁紙">`:'初期デザイン（壁紙なし）'}</div>
-    <div class="btn-row"><button class="btn primary" data-act="pick-wall">${ic('image')}写真から選ぶ</button>${wu?`<button class="btn ghost" data-act="reset-wall">初期デザインに戻す</button>`:''}</div>
+    <div class="wall-prev">${wu?`<img src="${wu}" alt="現在の壁紙" style="${posStyle(SET.wall)}">`:'初期デザイン（壁紙なし）'}</div>
+    <div class="btn-row"><button class="btn primary" data-act="pick-wall">${ic('image')}写真から選ぶ</button>${wu?`<button class="btn" data-act="adjust-wall">${ic('edit')}位置を調整</button><button class="btn ghost" data-act="reset-wall">初期デザインに戻す</button>`:''}</div>
     <div class="field"><label for="rm-shade">文字を読みやすくする（重ねる色の濃さ） <span class="muted" id="rm-shade-v">${Math.round(SET.shade*100)}%</span></label><input type="range" id="rm-shade" min="0" max="0.9" step="0.05" value="${SET.shade}"></div>
     <div class="field"><label for="rm-blur">壁紙のぼかし <span class="muted" id="rm-blur-v">${SET.blur}px</span></label><input type="range" id="rm-blur" min="0" max="24" step="1" value="${SET.blur}"></div>
     <p class="note" style="margin:0">保存済みの写真を壁紙にするときは、写真を開いて ${ic('wall')} を押します。</p>
    </div>
    <div class="panel" style="display:flex;flex-direction:column;gap:12px">
-    <div class="sec-h"><h2 style="font-size:16px">バックアップ</h2><span class="eyebrow">BACKUP</span></div>
-    <p class="note" style="margin:0">写真・動画と分類をまとめて1つのZIPに書き出せます。別のブラウザや端末でも「読み込む」で復元できます。${usage?`<br>${usage}`:''}</p>
+    <div class="sec-h"><h2 style="font-size:16px">データの保存</h2><span class="eyebrow">STORAGE</span></div>
+    <div class="warn" style="background:${persisted?'var(--mint-soft)':'var(--accent-soft)'}">${persisted?'✓ このブラウザの保存データは保護されています。サイトを更新しても、写真・分類・☆・表紙・壁紙は消えません。':'サイトを更新しても写真や分類は消えません。ただ、iPhoneはしばらく開かないサイトのデータを消すことがあるため、<b>ホーム画面に追加</b>して使うと安心です。'}</div>
+    <p class="note" style="margin:0">${usage?usage+'<br>':''}${SET.lastBackup?`最後のバックアップ：${fmtDate(SET.lastBackup)}${sinceBackup?`（その後 ${sinceBackup}件 追加）`:'（その後の追加なし）'}`:'まだバックアップしていません。'}<br>機種変更やブラウザのデータ削除に備えて、ときどき書き出しておくと安心です。</p>
     <div class="btn-row"><button class="btn" data-act="export">${ic('down')}すべて書き出す</button><button class="btn" data-act="import">${ic('box')}バックアップを読み込む</button></div>
     <div id="bk-progress" class="note"></div>
    </div>
@@ -1487,24 +1534,28 @@ let wallURL=null;
 async function setWallpaper(blob){
   let b=blob;
   try{const u=URL.createObjectURL(blob);const img=await loadImg(u);const s=Math.min(1,2400/Math.max(img.naturalWidth,img.naturalHeight));const c=document.createElement('canvas');c.width=Math.round(img.naturalWidth*s);c.height=Math.round(img.naturalHeight*s);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);b=await new Promise(r=>c.toBlob(r,'image/jpeg',.88))||blob;}catch(e){}
+  SET.wall={x:50,y:50,z:1};saveSettings();
   await putMeta('wallpaper',b).catch(()=>{});showWall(b);if(VIEW==='room')renderRoom();
+  adjustWall(b);
 }
-function showWall(b){if(wallURL){URL.revokeObjectURL(wallURL);wallURL=null}
+function applyWallPos(){const w=SET.wall||{x:50,y:50,z:1};const el=$('#wall');el.style.backgroundPosition=`${w.x}% ${w.y}%`;el.style.transformOrigin=`${w.x}% ${w.y}%`;el.style.transform=`scale(${w.z})`;}
+function adjustWall(blob){openCropper({blob,pos:SET.wall,frames:WALL_FRAMES,title:'壁紙の位置を調整',onSave:q=>{SET.wall=q;saveSettings();applyWallPos();if(VIEW==='room')renderRoom();toast('壁紙の位置を調整しました');}});}
+function showWall(b){applyWallPos();if(wallURL){URL.revokeObjectURL(wallURL);wallURL=null}
   if(b){wallURL=URL.createObjectURL(b);$('#wall').style.backgroundImage=`url("${wallURL}")`;document.body.classList.add('has-wall')}
   else{$('#wall').style.backgroundImage='';document.body.classList.remove('has-wall')}}
-$('#hidden-wall-input').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(f){await setWallpaper(f);toast('壁紙を設定しました')}});
+$('#hidden-wall-input').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(f){await setWallpaper(f);}});
 
 /* backup */
 async function exportAll(){
   if(!window.JSZip){toast('書き出しの準備ができていません');return;}
   const out=$('#bk-progress');const zip=new JSZip();const list=[...MEDIA.values()];
   const meta=list.map(m=>{const {thumb,...rest}=m;return rest});
-  zip.file('catalog.json',JSON.stringify(CAT));zip.file('media.json',JSON.stringify(meta));zip.file('settings.json',JSON.stringify(SET));ICONS.forEach((b,k)=>zip.file(`icons/${encodeURIComponent(k)}.jpg`,b));
+  zip.file('catalog.json',JSON.stringify(CAT));zip.file('media.json',JSON.stringify(meta));zip.file('settings.json',JSON.stringify(SET));const ipos={};ICONS.forEach((v,k)=>{zip.file(`icons/${encodeURIComponent(k)}.jpg`,v.blob);ipos[k]={x:v.x,y:v.y,z:v.z}});zip.file('icons.json',JSON.stringify(ipos));
   let i=0;for(const m of list){const b=await getFile(m.id);if(b)zip.file(`files/${m.id}`,b);if(m.thumb)zip.file(`thumbs/${m.id}.jpg`,m.thumb);i++;if(out)out.textContent=`${i} / ${list.length} 件を準備中…`;}
   const wall=await getMeta('wallpaper').catch(()=>null);if(wall)zip.file('wallpaper.jpg',wall);
   if(out)out.textContent='ZIPを作成中…';
   const blob=await zip.generateAsync({type:'blob'},p=>{if(out)out.textContent=`ZIPを作成中… ${Math.round(p.percent)}%`});
-  await downloadBlob(blob,`kphoto-backup_${fmtDate(Date.now()).replace(/\./g,'')}.zip`);if(out)out.textContent=`${list.length}件を書き出しました（${fmtSize(blob.size)}）`;
+  await downloadBlob(blob,`kphoto-backup_${fmtDate(Date.now()).replace(/\./g,'')}.zip`);SET.lastBackup=Date.now();saveSettings();if(out)out.textContent=`${list.length}件を書き出しました（${fmtSize(blob.size)}）`;
 }
 async function importAll(file){
   if(!window.JSZip){toast('読み込みの準備ができていません');return;}
@@ -1518,7 +1569,8 @@ async function importAll(file){
       const fz=zip.file(`files/${m.id}`);if(!fz)continue;const blob=new Blob([await fz.async('arraybuffer')],{type:m.mime||''});
       const tz=zip.file(`thumbs/${m.id}.jpg`);m.thumb=tz?new Blob([await tz.async('arraybuffer')],{type:'image/jpeg'}):null;
       await saveItem(m,blob);MEDIA.set(m.id,m);n++;}
-    const ifs=[];zip.forEach((p,f)=>{if(p.startsWith('icons/')&&!f.dir)ifs.push([p,f])});for(const [p,f] of ifs){const k=decodeURIComponent(p.slice(6).replace(/\.jpg$/,''));if(!ICONS.has(k))ICONS.set(k,new Blob([await f.async('arraybuffer')],{type:'image/jpeg'}))}if(ifs.length)await saveIcons();
+    let ipos={};try{const ij=zip.file('icons.json');if(ij)ipos=JSON.parse(await ij.async('string'))}catch(_){}
+    const ifs=[];zip.forEach((p,f)=>{if(p.startsWith('icons/')&&!f.dir)ifs.push([p,f])});for(const [p,f] of ifs){const k=decodeURIComponent(p.slice(6).replace(/\.jpg$/,''));if(!ICONS.has(k))ICONS.set(k,{blob:new Blob([await f.async('arraybuffer')],{type:'image/jpeg'}),...(ipos[k]||{x:50,y:50,z:1})})}if(ifs.length)await saveIcons();
     const wz=zip.file('wallpaper.jpg');if(wz&&!(await getMeta('wallpaper').catch(()=>null))){const w=new Blob([await wz.async('arraybuffer')],{type:'image/jpeg'});await putMeta('wallpaper',w);showWall(w);}
     if(out)out.textContent=`${n}件を読み込みました`;toast(`バックアップから${n}件を復元しました`);renderRoom();
   }catch(e){console.error(e);if(out)out.textContent='このファイルは読み込めませんでした。KPhotoで書き出したZIPを選んでください。';}
@@ -1542,6 +1594,7 @@ document.addEventListener('click',async e=>{
   if(a==='go-room-wall'||a==='go-room-groups'){go('room');setTimeout(()=>$(a==='go-room-wall'?'#room-wall':'#room-groups')?.scrollIntoView({behavior:'smooth',block:'start'}),120);return;}
   if(a==='pick-wall'){$('#hidden-wall-input').click();return;}
   if(a==='wall-from-lib'){F.library.kind='photo';go('library');toast('写真を開いて「壁紙に設定」ボタンを押してください');return;}
+  if(a==='adjust-wall'){const w=await getMeta('wallpaper').catch(()=>null);if(w)adjustWall(w);return;}
   if(a==='reset-wall'){await putMeta('wallpaper',null).catch(()=>{});showWall(null);renderRoom();toast('初期デザインに戻しました');return;}
   if(a==='export'){exportAll();return;}
   if(a==='import'){$('#hidden-import-input').click();return;}
@@ -1587,6 +1640,7 @@ async function boot(){
       const list=await getAllMedia();(list||[]).forEach(m=>MEDIA.set(m.id,m));
       const w=await getMeta('wallpaper');if(w)showWall(w);}catch(e){console.error(e)}}
   indexCat();applySettings();await loadIcons();
+  try{if(navigator.storage&&navigator.storage.persist&&!(await navigator.storage.persisted()))navigator.storage.persist();}catch(_){}
   try{await migrateOld()}catch(e){console.error(e)}
   const h=(location.hash||'').replace('#','');go(TABS.some(t=>t[0]===h)?h:'home');
   if(!db){const w=document.createElement('div');w.className='warn';w.textContent='このブラウザでは保存機能が使えないため、ページを閉じると内容が消えます（プライベートブラウズを解除すると保存できます）。';$('#app').prepend(w);}
