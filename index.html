@@ -425,6 +425,26 @@ details.presets summary{cursor:pointer;font-size:13px;font-weight:700;color:var(
 .crop-prev{position:relative;overflow:hidden;border-radius:12px;background:var(--lilac-soft);box-shadow:inset 0 0 0 1px var(--line)}
 .crop-side small{font-size:11px;color:var(--muted);margin-top:-6px}
 .crop-main+small{display:block;text-align:center}
+/* round icons */
+.boards.rounds{grid-template-columns:repeat(3,minmax(0,1fr));gap:22px 12px}
+@media (min-width:600px){.boards.rounds{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (min-width:900px){.boards.rounds{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.board.round{align-items:center;text-align:center}
+.rwrap{position:relative;width:100%;max-width:150px}
+.rico{position:relative;width:100%;aspect-ratio:1;max-width:100%;border-radius:50%;overflow:hidden;background:var(--accent-soft);display:grid;place-items:center;color:var(--accent);font-family:var(--display);font-style:italic;font-weight:800;font-size:clamp(20px,6vw,30px);box-shadow:0 0 0 3px var(--glass-strong),0 0 0 5px var(--line),var(--shadow-sm);transition:transform .15s ease}
+.rico svg.i{width:36%;height:36%;stroke-width:1.6}
+.board.round:hover .rico{transform:translateY(-2px)}
+.rico img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.rico.add{background:transparent;border:2px dashed var(--line);box-shadow:none;color:var(--muted)}
+.board.round .edit{top:auto;bottom:2px;right:2px}
+.board.round h4{max-width:100%;margin-top:10px}
+.board.round small{max-width:100%}
+.hrow{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.havatar{position:relative;width:clamp(110px,30vw,168px);aspect-ratio:1;border-radius:50%;overflow:hidden;background:var(--accent-soft);flex:none;display:grid;place-items:center;color:var(--accent);font-family:var(--display);font-style:italic;font-weight:800;font-size:40px;box-shadow:0 0 0 4px var(--glass-strong),0 0 0 6px var(--line),var(--shadow)}
+.havatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hinfo{flex:1;min-width:200px;display:flex;flex-direction:column;gap:6px}
+.hinfo h1{margin-top:0}
+.crop-main.round,.crop-prev.round{border-radius:50%}
 #toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:13.5px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100% - 32px)}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .warn{background:var(--accent-soft);color:var(--ink);border-radius:12px;padding:10px 14px;font-size:13px}
@@ -814,12 +834,14 @@ async function prepSource(blob,max=1600){
 }
 async function setIcon(key,rec){const old=iconUrlCache.get(key);if(old){URL.revokeObjectURL(old);iconUrlCache.delete(key)}
   if(rec)ICONS.set(key,rec);else ICONS.delete(key);await saveIcons();refresh();}
-const ICON_FRAMES=[{label:'カード',r:1,w:260},{label:'開いたときの表紙',r:1.6,w:150},{label:'サブボード',r:.87,w:80}];
+const ICON_FRAMES=[{label:'アイコン',r:1,w:240,round:true},{label:'小さく表示したとき',r:1,w:64,round:true}];
+const SUB_FRAMES=[{label:'サブボードの表紙',r:.87,w:180}];
+const framesFor=key=>key.startsWith('s:')?SUB_FRAMES:ICON_FRAMES;
 const WALL_FRAMES=[{label:'スマホ',r:9/19.5,w:170},{label:'パソコン',r:1.6,w:170}];
 /* position / zoom editor shared by covers and the wallpaper */
 function openCropper({blob,pos,frames,title,onSave}){
   const p={x:50,y:50,z:1,...(pos||{})};const url=URL.createObjectURL(blob);
-  const fr=(f,cls)=>`<div class="${cls}" style="width:${f.w}px;aspect-ratio:${f.r}"><img src="${url}" alt="" draggable="false">${cls==='crop-main'?'<div class="grid"></div>':''}</div>`;
+  const fr=(f,cls)=>`<div class="${cls}${f.round?' round':''}" style="width:${f.w}px;aspect-ratio:${f.r}"><img src="${url}" alt="" draggable="false">${cls==='crop-main'?'<div class="grid"></div>':''}</div>`;
   const m=openModal(`<h3>${esc(title||'位置と大きさを調整')}</h3>
    <p class="note" style="margin:0">写真をドラッグして見せたい部分を合わせ、下のスライダーで拡大できます。</p>
    <div class="crop-wrap"><div>${fr(frames[0],'crop-main')}<small class="muted" style="font-size:11px">${esc(frames[0].label)}</small></div>
@@ -843,21 +865,21 @@ function openCropper({blob,pos,frames,title,onSave}){
 }
 function openIconModal(key,title){
   const l=scopeList(key).filter(m=>m.thumb).slice(0,80);const rec=ICONS.get(key);
-  const m=openModal(`<h3>${esc(title)}の表紙</h3>
-   <div class="icon-prev">${iconHTML(key,title,{round:key.startsWith('m:')})}</div>
+  const m=openModal(`<h3>${esc(title)}の${key.startsWith('s:')?'表紙':'アイコン'}</h3>
+   <div class="icon-prev">${iconHTML(key,title,{round:!key.startsWith('s:')})}</div>
    <div class="btn-row" style="justify-content:center"><label class="btn primary" for="icon-file">${ic('image')}端末の写真から選ぶ</label>${rec?`<button class="btn" data-a="adjust">${ic('edit')}位置を調整</button><button class="btn ghost" data-a="clear">設定を外す</button>`:''}
     <input type="file" id="icon-file" accept="image/*" hidden></div>
    ${l.length?`<div class="flabel">保存済みの写真から選ぶ</div><div class="iconpick">${l.map(x=>`<button type="button" data-pick="${x.id}" aria-label="この写真を表紙にする"><img src="${thumbURL(x)}" alt=""></button>`).join('')}</div>`:'<p class="note" style="margin:0">写真を追加すると、ここから選べるようになります。</p>'}
-   <p class="note" style="margin:0">${rec?'':'未設定のあいだは、いちばん新しい写真が自動で表紙になります。'}選んだあとに、写真の位置と大きさを調整できます。</p>
+   <p class="note" style="margin:0">${rec?'':'未設定のあいだは、いちばん新しい写真が自動で使われます。'}選んだあとに、写真の位置と大きさを調整できます。</p>
    <div class="acts"><button class="btn" data-a="close">閉じる</button></div>`);
   const edit=async(src,pos)=>{if(!src){toast('この画像は読み込めませんでした');return;}
-    openCropper({blob:src,pos,frames:ICON_FRAMES,title:`${title}の表紙を調整`,onSave:async q=>{closeModal();await setIcon(key,{blob:src,...q});toast('表紙を設定しました');}});};
+    openCropper({blob:src,pos,frames:framesFor(key),title:`${title}のアイコンを調整`,onSave:async q=>{closeModal();await setIcon(key,{blob:src,...q});toast('設定しました');}});};
   $('#icon-file',m).addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;edit(await prepSource(f));});
   m.addEventListener('click',async e=>{
     const p=e.target.closest('[data-pick]');if(p){const x=MEDIA.get(p.dataset.pick);if(!x)return;let b=x.kind==='photo'?await getFile(x.id):null;edit(await prepSource(b||x.thumb));return;}
     const a=e.target.closest('[data-a]')?.dataset.a;if(a==='close')closeModal();
-    if(a==='adjust'&&rec)openCropper({blob:rec.blob,pos:rec,frames:ICON_FRAMES,title:`${title}の表紙を調整`,onSave:async q=>{closeModal();await setIcon(key,{blob:rec.blob,...q});toast('表紙を調整しました');}});
-    if(a==='clear'){await setIcon(key,null);closeModal();toast('表紙の設定を外しました')}});
+    if(a==='adjust'&&rec)openCropper({blob:rec.blob,pos:rec,frames:framesFor(key),title:`${title}のアイコンを調整`,onSave:async q=>{closeModal();await setIcon(key,{blob:rec.blob,...q});toast('調整しました');}});
+    if(a==='clear'){await setIcon(key,null);closeModal();toast('設定を外しました')}});
 }
 
 /* ---------- library: Pinterest-style boards ---------- */
@@ -873,7 +895,11 @@ function boardList(key){
 const subsOf=owner=>CAT.subs.filter(x=>x.owner===owner);
 function relTime(ts){if(!ts)return '';const d=Math.floor((Date.now()-ts)/86400000);if(d<1)return '今日';if(d<2)return '昨日';if(d<30)return d+'日前';if(d<365)return Math.floor(d/30)+'か月前';return Math.floor(d/365)+'年前';}
 function coverURLs(key,list,n){const urls=[];if(ICONS.has(key))urls.push({u:iconURL(key),st:icoStyle(key)});for(const m of list){if(urls.length>=n)break;if(!m.thumb)continue;const u=thumbURL(m);if(!urls.some(x=>x.u===u))urls.push({u,st:''});}return urls;}
-function boardCardHTML(key,title,emoji,list,attrs,{layout='big',meta='',edit=false}={}){
+function boardCardHTML(key,title,emoji,list,attrs,{layout='round',meta='',edit=false,fallback=''}={}){
+  if(layout==='round'){const u=iconURL(key);const last=list[0]?.added;
+    return `<div class="board round" role="button" tabindex="0" ${attrs}><div class="rwrap"><div class="rico">${u?`<img src="${u}" alt="" loading="lazy" style="${icoStyle(key)}">`:(fallback||esc(String(title||'?').replace(/\s+/g,'').slice(0,2).toUpperCase()))}</div>
+      ${edit?`<button class="edit" data-icon="${esc(key)}" data-title="${esc(title)}" aria-label="${esc(title)}のアイコンを変更">${ic('camera')}</button>`:''}</div>
+      <h4>${esc(title)}${emoji?' '+esc(emoji):''}</h4><small>${meta||`写真 ${list.length}件`}${last?`・${relTime(last)}`:''}</small></div>`;}
   const urls=coverURLs(key.startsWith('G:')?'g:'+key.slice(2):key,list,3);
   const init=esc(String(title||'?').replace(/\s+/g,'').slice(0,2).toUpperCase());
   const slots=[0,1,2].map(i=>`<span>${urls[i]?`<img src="${urls[i].u}" alt="" loading="lazy" style="${urls[i].st}">`:(i===0&&!urls.length?init:'')}</span>`).join('');
@@ -881,14 +907,15 @@ function boardCardHTML(key,title,emoji,list,attrs,{layout='big',meta='',edit=fal
   return `<div class="board" role="button" tabindex="0" ${attrs}>${edit?`<button class="edit" data-icon="${esc(key)}" data-title="${esc(title)}" aria-label="${esc(title)}の表紙を変更">${ic('camera')}</button>`:''}
     <div class="collage ${layout}">${slots}</div><h4>${esc(title)}${emoji?' '+esc(emoji):''}</h4><small>${meta||`写真 ${list.length}件`}${last?`・${relTime(last)}`:''}</small></div>`;
 }
-function addBoardHTML(label,attrs,layout='big'){return `<div class="board" role="button" tabindex="0" ${attrs}><div class="collage add ${layout}">${ic('plus')}</div><h4>${label}</h4><small>&nbsp;</small></div>`;}
+function addBoardHTML(label,attrs,layout='round'){if(layout==='round')return `<div class="board round" role="button" tabindex="0" ${attrs}><div class="rwrap"><div class="rico add">${ic('plus')}</div></div><h4>${label}</h4><small>&nbsp;</small></div>`;return `<div class="board" role="button" tabindex="0" ${attrs}><div class="collage add ${layout}">${ic('plus')}</div><h4>${label}</h4><small>&nbsp;</small></div>`;}
 function heroHTML(key,title,emoji,meta,desc,editAttrs){
   const u=iconURL(key);
-  return `<div class="bhero"><div class="cover">${u?`<img src="${u}" alt="" style="${icoStyle(key)}">`:esc(String(title).replace(/\s+/g,'').slice(0,2).toUpperCase())}
-     <div class="acts"><button data-icon="${esc(key)}" data-title="${esc(title)}" aria-label="表紙を変更">${ic('camera')}</button><button ${editAttrs} aria-label="編集">${ic('edit')}</button></div></div>
-    <h1>${esc(title)}${emoji?`<span class="emo">${esc(emoji)}</span>`:''}</h1><div class="meta">${meta}</div>
+  return `<div class="bhero"><div class="hrow"><div class="havatar">${u?`<img src="${u}" alt="" style="${icoStyle(key)}">`:esc(String(title).replace(/\s+/g,'').slice(0,2).toUpperCase())}</div>
+    <div class="hinfo"><h1>${esc(title)}${emoji?`<span class="emo">${esc(emoji)}</span>`:''}</h1><div class="meta">${meta}</div>
+     <div class="btn-row"><button class="btn sm" data-icon="${esc(key)}" data-title="${esc(title)}">${ic('camera')}アイコンを変更</button><button class="btn sm" ${editAttrs}>${ic('edit')}編集</button></div></div></div>
     ${desc?`<p class="desc clamp" id="bdesc">${esc(desc)}</p>${desc.length>60||desc.includes('\n')?`<button class="more-desc" data-moredesc="1">さらに表示</button>`:''}`:''}</div>`;
 }
+
 function masonryBlock(list,title,addAttrs){
   const kindCount=k=>list.filter(m=>k==='all'||m.kind===k).length;
   const l=list.filter(m=>LIB.kind==='all'||m.kind===LIB.kind).sort((a,b)=>LIB.sort==='old'?a.added-b.added:b.added-a.added);
@@ -925,9 +952,9 @@ function renderLibrary(){
   const g=G.get(LIB.g);const crumbs=[];let body='';
   if(!g){
     const groups=sortedGroups();
-    body=`<div class="bsec"><div class="bsec-h"><h3>グループ</h3><span>${groups.length}</span><span style="margin-left:auto">${ic('camera')} で表紙を変更</span></div>
-      ${groups.length?`<div class="boards">${groups.map(x=>{const l=boardList('G:'+x.id);return boardCardHTML('g:'+x.id,x.name,x.emoji,l,`data-libg="${x.id}"`,{meta:`写真 ${l.length}件・メンバー ${membersOf(x.id).length}人`,edit:true})}).join('')}${addBoardHTML('グループを追加','data-act="new-group"')}</div>`
-      :`<div class="boards">${addBoardHTML('グループを追加','data-act="new-group"')}</div><p class="note" style="margin:0">まずはグループを登録しましょう。有名グループはプリセットから選べます。</p>`}</div>`;
+    body=`<div class="bsec"><div class="bsec-h"><h3>グループ</h3><span>${groups.length}</span><span style="margin-left:auto">${ic('camera')} でアイコンを変更</span></div>
+      ${groups.length?`<div class="boards rounds">${groups.map(x=>{const l=boardList('G:'+x.id);return boardCardHTML('g:'+x.id,x.name,x.emoji,l,`data-libg="${x.id}"`,{meta:`写真 ${l.length}件・メンバー ${membersOf(x.id).length}人`,edit:true})}).join('')}${addBoardHTML('グループを追加','data-act="new-group"')}</div>`
+      :`<div class="boards rounds">${addBoardHTML('グループを追加','data-act="new-group"')}</div><p class="note" style="margin:0">まずはグループを登録しましょう。有名グループはプリセットから選べます。</p>`}</div>`;
   }else{
     crumbs.push(`<button data-crumb="root">ライブラリ</button>`);
     const secLabel=SECS.find(x=>x[0]===LIB.sec)?.[1]||'';
@@ -938,7 +965,7 @@ function renderLibrary(){
       const total=boardList('G:'+g.id);const mem=membersOf(g.id),ch=CAT.chemis.filter(c=>chemiGroups(c).includes(g.id));
       const meta={group:l=>`写真 ${l.length}件・サブボード ${subsOf('g:'+g.id).length}件`,member:l=>`${mem.length}人・写真 ${l.length}件`,chemi:l=>`${ch.length}組・写真 ${l.length}件`};
       body=heroHTML('g:'+g.id,g.name,g.emoji,`${esc(g.agency||'事務所未設定')}・${genLabel(g.gen)}・写真 ${total.length}件・メンバー ${mem.length}人${total[0]?'・更新 '+relTime(total[0].added):''}`,g.desc,`data-act="edit-group" data-id="${g.id}"`)
-       +`<div class="bsec"><div class="bsec-h"><h3>見たいものを選ぶ</h3><span>${ic('camera')} で表紙を変更</span></div><div class="boards">${SECS.map(([sec,label])=>{const l=secList(g.id,sec);return boardCardHTML(`gs:${g.id}:${sec}`,label,'',l,`data-libsec="${sec}"`,{meta:meta[sec](l),edit:true})}).join('')}</div></div>`;
+       +`<div class="bsec"><div class="bsec-h"><h3>見たいものを選ぶ</h3><span>${ic('camera')} でアイコンを変更</span></div><div class="boards rounds">${SECS.map(([sec,label])=>{const l=secList(g.id,sec);return boardCardHTML(`gs:${g.id}:${sec}`,label,'',l,`data-libsec="${sec}"`,{meta:meta[sec](l),edit:true,fallback:ic(SECS.find(x=>x[0]===sec)[2])})}).join('')}</div></div>`;
     }else if(LIB.sec==='group'&&!sub){
       crumbs.push(`<button data-crumb="group">${esc(g.name)}</button>`,`<b>${secLabel}</b>`);
       body=`<div class="subhead"><div><div class="eyebrow">${esc(g.name)}</div><h2>グループ</h2></div></div>`+subBoardsBlock('g:'+g.id,'サブボード')+masonryBlock(boardList('g:'+g.id),'グループ全体の写真','data-libadd="1"');
@@ -946,10 +973,10 @@ function renderLibrary(){
       crumbs.push(`<button data-crumb="group">${esc(g.name)}</button>`,`<b>${secLabel}</b>`);
       if(LIB.sec==='member'){const mem=membersOf(g.id);
         body=`<div class="subhead"><div><div class="eyebrow">${esc(g.name)}</div><h2>個人</h2></div></div>
-         <div class="bsec"><div class="bsec-h"><h3>メンバー</h3><span>${mem.length}人</span><span style="margin-left:auto">${ic('camera')} で表紙を変更</span></div><div class="boards">${mem.map(x=>{const l=boardList('m:'+x.id);return boardCardHTML('m:'+x.id,x.name,x.emoji,l,`data-libb="m:${x.id}"`,{meta:`写真 ${l.length}件・サブボード ${subsOf('m:'+x.id).length}件`,edit:true})}).join('')}${addBoardHTML('メンバーを追加',`data-addmember="${g.id}"`)}</div></div>`;
+         <div class="bsec"><div class="bsec-h"><h3>メンバー</h3><span>${mem.length}人</span><span style="margin-left:auto">${ic('camera')} でアイコンを変更</span></div><div class="boards rounds">${mem.map(x=>{const l=boardList('m:'+x.id);return boardCardHTML('m:'+x.id,x.name,x.emoji,l,`data-libb="m:${x.id}"`,{meta:`写真 ${l.length}件・サブボード ${subsOf('m:'+x.id).length}件`,edit:true})}).join('')}${addBoardHTML('メンバーを追加',`data-addmember="${g.id}"`)}</div></div>`;
       }else{const ch=CAT.chemis.filter(c=>chemiGroups(c).includes(g.id));
         body=`<div class="subhead"><div><div class="eyebrow">${esc(g.name)}</div><h2>ケミ</h2></div></div>
-         <div class="bsec"><div class="bsec-h"><h3>ケミ</h3><span>${ch.length}組</span><span style="margin-left:auto">${ic('camera')} で表紙を変更</span></div><div class="boards">${ch.map(c=>{const l=boardList('c:'+c.id);return boardCardHTML('c:'+c.id,c.name,c.emoji,l,`data-libb="c:${c.id}"`,{meta:`写真 ${l.length}件・サブボード ${subsOf('c:'+c.id).length}件`,edit:true})}).join('')}${addBoardHTML('ケミを作る',`data-addchemi="${g.id}"`)}</div></div>`;}
+         <div class="bsec"><div class="bsec-h"><h3>ケミ</h3><span>${ch.length}組</span><span style="margin-left:auto">${ic('camera')} でアイコンを変更</span></div><div class="boards rounds">${ch.map(c=>{const l=boardList('c:'+c.id);return boardCardHTML('c:'+c.id,c.name,c.emoji,l,`data-libb="c:${c.id}"`,{meta:`写真 ${l.length}件・サブボード ${subsOf('c:'+c.id).length}件`,edit:true})}).join('')}${addBoardHTML('ケミを作る',`data-addchemi="${g.id}"`)}</div></div>`;}
     }else if(board&&!sub){
       crumbs.push(`<button data-crumb="group">${esc(g.name)}</button>`,`<button data-crumb="sec">${secLabel}</button>`,`<b>${esc(board.name)}</b>`);
       const l=boardList(LIB.b);const o=board.o;
