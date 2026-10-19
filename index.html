@@ -229,6 +229,12 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .drop{border:2px dashed var(--line);border-radius:var(--r-lg);padding:28px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;background:var(--glass-strong);transition:border-color .15s,background .15s}
 .drop.over{border-color:var(--accent);background:var(--accent-soft)}
 .drop .big{width:58px;height:58px;border-radius:18px;display:grid;place-items:center}
+.pastebox{border:2px dashed var(--line);border-radius:var(--r-md);padding:14px 16px;display:flex;align-items:center;gap:12px;background:var(--glass-strong);cursor:text;-webkit-user-select:text;user-select:text;outline:none;min-height:60px;caret-color:transparent}
+.pastebox:focus,.pastebox.over{border-color:var(--accent);background:var(--accent-soft)}
+.pastebox .big{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none;pointer-events:none}
+.pastebox .t{display:flex;flex-direction:column;gap:2px;pointer-events:none;min-width:0}
+.pastebox .t b{font-size:14px}
+.pastebox .t span{font-size:12px;color:var(--muted)}
 .drop b{font-size:16px}
 .pgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 @media (min-width:700px){.pgrid{grid-template-columns:repeat(8,minmax(0,1fr))}}
@@ -477,6 +483,7 @@ const P={
  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/>',
  moon:'<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
  camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+ copy:'<rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
  video:'<rect x="3" y="6" width="13" height="12" rx="3"/><path d="M16 10l5-3v10l-5-3z"/>',
 };
 const ic=(n,cls='')=>`<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[n]||''}</svg>`;
@@ -1233,6 +1240,7 @@ function renderAdd(){
     <div class="panel" style="display:flex;flex-direction:column;gap:14px">
      <label class="drop" id="drop" for="add-input"><span class="big c-pink">${ic('image')}</span><b>写真・動画を選ぶ</b><span class="note">何枚でもまとめて選べます。ここにドラッグ＆ドロップもOK</span>
       <input type="file" id="add-input" accept="image/*,video/*" multiple hidden></label>
+     <div class="pastebox" id="pastebox" contenteditable="true" inputmode="none" role="textbox" aria-label="コピーした写真をここに貼り付け" spellcheck="false"><span class="big c-sky" contenteditable="false">${ic('copy')}</span><span class="t" contenteditable="false"><b>コピーした写真を貼り付け</b><span>ネットの写真を長押し→「コピー」したあと、ここを長押し→「ペースト」（PCは Ctrl / ⌘ + V）</span></span></div>
      <div id="add-preview"></div>
     </div>
     <div class="panel" style="display:flex;flex-direction:column;gap:14px">
@@ -1250,10 +1258,35 @@ function renderAdd(){
   ['dragenter','dragover'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add('over')}));
   ['dragleave','drop'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove('over')}));
   drop.addEventListener('drop',e=>addFiles([...(e.dataTransfer?.files||[])]));
+  const pb=$('#pastebox');
+  pb.addEventListener('beforeinput',e=>{if(e.inputType!=='insertFromPaste')e.preventDefault();});
+  pb.addEventListener('input',()=>{resetPasteBox()});
+  pb.addEventListener('drop',e=>{e.preventDefault();addFiles([...(e.dataTransfer?.files||[])]);});
   $('#add-save').addEventListener('click',saveAdd);
   $('#add-preview').addEventListener('click',e=>{const r=e.target.closest('[data-rm]');if(r){const i=+r.dataset.rm;URL.revokeObjectURL(ADD.files[i].url);ADD.files.splice(i,1);drawAddPreview();return;}
     if(e.target.closest('[data-act="clear-add"]')){ADD.files.forEach(f=>URL.revokeObjectURL(f.url));ADD.files=[];drawAddPreview();}});
 }
+function resetPasteBox(){const pb=$('#pastebox');if(!pb)return;[...pb.childNodes].forEach(n=>{if(!(n.nodeType===1&&n.getAttribute('contenteditable')==='false'))n.remove();});}
+function pasteName(type,i){const d=new Date(),p=n=>String(n).padStart(2,'0');const ext=(type.split('/')[1]||'png').replace('jpeg','jpg').replace('quicktime','mov');return `paste_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}_${i+1}.${ext}`;}
+async function handlePaste(e){
+  if(VIEW!=='add')return;
+  const t=e.target;if(t&&t.closest&&t.closest('input,textarea')&&!t.closest('#pastebox'))return;
+  const cd=e.clipboardData;if(!cd)return;
+  const files=[];
+  [...(cd.items||[])].forEach(it=>{if(it.kind==='file'){const f=it.getAsFile();if(f&&/^(image|video)\//.test(f.type||''))files.push(f)}});
+  if(!files.length)[...(cd.files||[])].forEach(f=>{if(/^(image|video)\//.test(f.type||''))files.push(f)});
+  e.preventDefault();setTimeout(resetPasteBox,0);
+  if(files.length){addFiles(files.map((f,i)=>new File([f],f.name&&!/^image\.(png|jpe?g)$/i.test(f.name)?f.name:pasteName(f.type||'image/png',i),{type:f.type||'image/png',lastModified:Date.now()})));toast(`${files.length}件を貼り付けました`);return;}
+  const html=cd.getData('text/html')||'';const txt=(cd.getData('text/plain')||'').trim();
+  const srcs=[...html.matchAll(/<img[^>]+src=["']([^"']+)["']/gi)].map(m=>m[1]);
+  if(!srcs.length&&/^(https?:|data:image)/.test(txt)&&/\.(jpe?g|png|gif|webp|avif|heic)(\?|$)|^data:image/i.test(txt))srcs.push(txt);
+  if(!srcs.length){toast('貼り付けられる写真が見つかりませんでした。写真そのものを長押し→「コピー」してください');return;}
+  let ok=0;const got=[];
+  for(const [i,src] of srcs.slice(0,30).entries()){try{const res=await fetch(src.replace(/&amp;/g,'&'));if(!res.ok)throw 0;const b=await res.blob();if(!/^(image|video)\//.test(b.type))throw 0;got.push(new File([b],pasteName(b.type,i),{type:b.type,lastModified:Date.now()}));ok++;}catch(_){}}
+  if(got.length){addFiles(got);toast(`${ok}件を貼り付けました`);}
+  else toast('このサイトの写真はリンクからは取り込めませんでした。写真を長押し→「コピー」で試してください');
+}
+document.addEventListener('paste',handlePaste);
 function addFiles(files){let skipped=0;files.forEach(f=>{const k=kindOf(f);if(!k){skipped++;return}ADD.files.push({file:f,kind:k,url:URL.createObjectURL(f)})});if(skipped)toast(`${skipped}件は写真・動画ではないため除きました`);drawAddPreview();}
 function drawAddPreview(){const el=$('#add-preview');if(!el)return;
   if(!ADD.files.length){el.innerHTML='';$('#add-save')&&($('#add-save').disabled=true);return;}
