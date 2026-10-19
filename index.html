@@ -566,6 +566,7 @@ function go(v,opts={}){
   if(!opts.keepScroll)window.scrollTo({top:0});
   if(opts.focus){setTimeout(()=>{const el=$(`#${v}-q`);el&&el.focus()},50)}
 }
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h!==VIEW&&TABS.some(t=>t[0]===h))go(h);});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(!b)return;e.preventDefault();go(b.dataset.go,{focus:b.dataset.focus});});
 function render(v){({home:renderHome,library:renderLibrary,add:renderAdd,calendar:renderCalendar,collection:()=>renderGridView('collection'),room:renderRoom})[v]?.();}
 function refresh(){render(VIEW)}
