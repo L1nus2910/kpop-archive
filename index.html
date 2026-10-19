@@ -92,7 +92,7 @@ main{max-width:1180px;margin:0 auto;padding-block:18px 120px;padding-left:max(16
 
 /* tab bar */
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--glass-strong);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);border-top:1px solid var(--line);
-  display:grid;grid-template-columns:repeat(6,1fr);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+  display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
 .tabbar button{border:0;background:none;padding:8px 0 7px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;letter-spacing:-.02em;white-space:nowrap;color:var(--muted);font-weight:500}
 .tabbar button.on{color:var(--accent)}
 .tabbar .tab-add span.ic{width:44px;height:44px;margin-top:-18px;border-radius:16px;display:grid;place-items:center;background:var(--grad);color:var(--on-accent);box-shadow:var(--gloss),0 8px 20px rgba(47,116,232,.38)}
@@ -424,16 +424,14 @@ details.presets summary{cursor:pointer;font-size:13px;font-weight:700;color:var(
     <span class="brand-t"><b>KPhoto</b><small>K-POP PHOTO LIBRARY</small></span>
   </button>
   <nav class="topnav" id="topnav"></nav>
-  <div class="top-tools"><button class="theme-btn" id="theme-btn" data-act="toggle-theme" aria-label="ライト・ダークを切り替え"></button><button class="top-search" data-act="go-search" aria-label="写真を探す"></button></div>
+  <div class="top-tools"><button class="theme-btn" id="theme-btn" data-act="toggle-theme" aria-label="ライト・ダークを切り替え"></button></div>
 </div></header>
 
 <main id="app">
   <section class="view" id="v-home"></section>
   <section class="view" id="v-library" hidden></section>
   <section class="view" id="v-add" hidden></section>
-  <section class="view" id="v-calendar" hidden></section>
-  <section class="view" id="v-collection" hidden></section>
-  <section class="view" id="v-room" hidden></section>
+      <section class="view" id="v-room" hidden></section>
 </main>
 
 <nav class="tabbar" id="tabbar"></nav>
@@ -482,7 +480,7 @@ const P={
  video:'<rect x="3" y="6" width="13" height="12" rx="3"/><path d="M16 10l5-3v10l-5-3z"/>',
 };
 const ic=(n,cls='')=>`<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[n]||''}</svg>`;
-$('.top-search').innerHTML=ic('search');
+
 
 /* ---------- constants ---------- */
 const PRESET_AGENCIES=['HYBE','BIGHIT MUSIC','PLEDIS','SOURCE MUSIC','ADOR','BELIFT LAB','KOZ','SM','JYP','YG','STARSHIP','CUBE','FNC','WAKEONE','KQ','RBW','その他'];
@@ -522,7 +520,7 @@ async function saveCat(){indexCat();try{await putMeta('catalog',CAT)}catch(e){}}
 const blankF=()=>({cat:'all',kind:'all',agency:'',gen:'',group:'',member:'',chemi:'',q:'',sort:'new',open:false});
 const F={library:blankF(),collection:blankF()};
 let VIEW='home';
-const SHOWN={library:120,collection:120};
+const SHOWN={library:120,collection:120,home:60};
 const LAST={library:[],collection:[],home:[],calendar:[]};
 const CAL={y:new Date().getFullYear(),m:new Date().getMonth(),day:'',basis:'added'};
 const tsOf=m=>CAL.basis==='taken'?(m.taken||m.added):m.added;
@@ -604,7 +602,7 @@ function filtered(view){const f=F[view];const list=[...MEDIA.values()].filter(m=
 function activeCount(f){return ['agency','gen','group','member','chemi'].filter(k=>f[k]).length+(f.cat!=='all'?1:0)+(f.kind!=='all'?1:0)}
 
 /* ---------- navigation ---------- */
-const TABS=[['home','ホーム','home'],['library','ライブラリ','grid'],['add','追加','plus'],['calendar','カレンダー','cal'],['collection','コレクション','star'],['room','My Room','room']];
+const TABS=[['home','ホーム','home'],['library','ライブラリ','grid'],['add','追加','plus'],['room','My Room','room']];
 function drawNav(){
   $('#tabbar').innerHTML=TABS.map(([v,l,i])=>`<button data-go="${v}" class="${v==='add'?'tab-add':''} ${VIEW===v?'on':''}"><span class="ic">${ic(i)}</span>${l}</button>`).join('');
   $('#topnav').innerHTML=TABS.map(([v,l,i])=>`<button data-go="${v}" class="${VIEW===v?'on':''}">${ic(i)}${l}</button>`).join('');
@@ -619,15 +617,14 @@ function go(v,opts={}){
 }
 window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h!==VIEW&&TABS.some(t=>t[0]===h))go(h);});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(!b)return;e.preventDefault();go(b.dataset.go,{focus:b.dataset.focus});});
-function render(v){({home:renderHome,library:renderLibrary,add:renderAdd,calendar:renderCalendar,collection:()=>renderGridView('collection'),room:renderRoom})[v]?.();}
+function render(v){({home:renderHome,library:renderLibrary,add:renderAdd,room:renderRoom})[v]?.();}
 function refresh(){render(VIEW)}
 
 /* ---------- HOME ---------- */
 function renderHome(){
-  const all=[...MEDIA.values()];const photos=all.filter(m=>m.kind==='photo').length,videos=all.length-photos,favs=all.filter(m=>m.fav).length;
-  const favList=all.filter(m=>m.fav).sort((a,b)=>(b.favAt||b.added)-(a.favAt||a.added));const recent=favList.slice(0,12);LAST.home=recent.map(m=>m.id);
-  const groups=sortedGroups();
-  const count=g=>[...MEDIA.values()].filter(m=>(m.groupIds||[]).includes(g.id)).length;
+  const all=[...MEDIA.values()];const photos=all.filter(m=>m.kind==='photo').length,videos=all.length-photos;
+  const favList=all.filter(m=>m.fav).sort((a,b)=>(b.favAt||b.added)-(a.favAt||a.added));
+  const shown=favList.slice(0,SHOWN.home);LAST.home=favList.map(m=>m.id);
   $('#v-home').innerHTML=`
   <div class="panel hero">
     <svg class="orbit" viewBox="0 0 520 300" aria-hidden="true"><defs><linearGradient id="orbitg" x1="0" x2="1"><stop offset="0" style="stop-color:var(--g4);stop-opacity:0"/><stop offset=".35" style="stop-color:var(--g1)"/><stop offset=".7" style="stop-color:var(--g2)"/><stop offset="1" style="stop-color:var(--g4)"/></linearGradient></defs>
@@ -635,35 +632,23 @@ function renderHome(){
      <path class="spark" d="M430 58 L436 84 L462 90 L436 96 L430 122 L424 96 L398 90 L424 84 Z"/></svg>
     <div><div class="eyebrow">K-POP PHOTO LIBRARY</div></div>
     <h1><em>KPhoto</em></h1>
-    <p>好きな瞬間を集めて、いつでもそばに。グループ・メンバー・ケミごとに整理して、事務所や世代からも探せます。</p>
+    <p>好きな瞬間を集めて、いつでもそばに。</p>
     <div class="stats">
       <div class="stat"><b>${photos}</b><span>写真</span></div>
       <div class="stat"><b>${videos}</b><span>動画</span></div>
-      <div class="stat"><b>${favs}</b><span>☆ My Collection</span></div>
+      <div class="stat"><b>${favList.length}</b><span>☆ お気に入り</span></div>
       <div class="stat"><b>${CAT.groups.length}</b><span>グループ</span></div>
     </div>
   </div>
-  <div class="panel">
-    <div class="sec-h" style="margin-bottom:12px"><h2>メニュー</h2><span class="eyebrow">MENU</span></div>
-    <div class="menu">
-      <button class="mtile" data-go="add"><span class="ic c-pink">${ic('plus')}</span><b>まとめて追加</b><small>ADD MEDIA</small></button>
-      <button class="mtile" data-go="library"><span class="ic c-sky">${ic('grid')}</span><b>ライブラリ</b><small>LIBRARY</small></button>
-      <button class="mtile" data-go="calendar"><span class="ic c-lilac">${ic('cal')}</span><b>カレンダー</b><small>CALENDAR</small></button>
-      <button class="mtile" data-go="collection"><span class="ic c-pink">${ic('star')}</span><b>My Collection</b><small>FAVORITES</small></button>
-      <button class="mtile" data-act="go-room-wall"><span class="ic c-mint">${ic('wall')}</span><b>壁紙を変える</b><small>WALLPAPER</small></button>
-      <button class="mtile" data-act="go-room-groups"><span class="ic c-sky">${ic('users')}</span><b>グループ管理</b><small>GROUPS</small></button>
-    </div>
+  <div class="bsec">
+    <div class="bsec-h"><h3>☆ お気に入り</h3><span>${favList.length}件</span>${favList.length?`<button class="btn sm ${SEL.on&&SEL.view==='home'?'primary':''}" data-act="toggle-select">${ic('select')}${SEL.on&&SEL.view==='home'?'選択を終了':'選択'}</button>`:''}</div>
+    ${favList.length?`<div class="masonry ${SEL.on&&SEL.view==='home'?'selecting':''}" data-view="home">${shown.map(tileHTML).join('')}</div>
+      ${favList.length>shown.length?`<div style="text-align:center"><button class="btn" data-homemore="1">もっと見る（残り${favList.length-shown.length}件）</button></div>`:''}`
+    :`<div class="panel">${emptyHTML('star','c-pink','☆を付けた写真がここに並びます',all.length?'写真の☆をタップすると、ここに集まります。':'「追加」タブから写真を保存して、☆を付けてみてください。')}</div>`}
   </div>
-  <div class="panel">
-    <div class="sec-h" style="margin-bottom:12px"><h2>グループから見る</h2><span class="eyebrow">GROUPS</span>${groups.length?`<button class="more" data-go="library">すべて見る ›</button>`:''}</div>
-    ${groups.length?`<div class="boards">${groups.map(g=>boardCardHTML('g:'+g.id,g.name,g.emoji,boardList('G:'+g.id),`data-act="open-group" data-id="${g.id}"`,{layout:'big',meta:`写真 ${count(g)}件・メンバー ${membersOf(g.id).length}人`})).join('')}</div>`
-    :emptyHTML('users','c-sky','まずはグループを登録','推しのグループとメンバーを登録すると、写真をグループ全体・個人・ケミで整理できます。','<button class="btn primary" data-act="new-group">'+ic('plus')+'グループを追加</button> <button class="btn" data-act="go-room-groups">プリセットから選ぶ</button>')}
-  </div>
-  <div class="panel">
-    <div class="sec-h" style="margin-bottom:12px"><h2>☆ お気に入り</h2><span class="eyebrow">MY COLLECTION</span>${favList.length?`<button class="more" data-go="collection">すべて見る（${favList.length}） ›</button>`:''}</div>
-    ${recent.length?`<div class="masonry" data-view="home">${recent.map(tileHTML).join('')}</div>`:(all.length?emptyHTML('star','c-pink','☆を付けた写真がここに並びます','写真の☆をタップすると、ホームのお気に入りに表示されます。','<button class="btn primary" data-go="library">ライブラリを開く</button>'):emptyHTML('image','c-pink','まだ写真がありません','「まとめて追加」から、写真や動画を何枚でも一度に保存できます。','<button class="btn primary" data-go="add">'+ic('plus')+'写真・動画を追加</button>'))}
-  </div>`;
+  <div class="bsec" id="home-cal"></div>`;
   hydrate($('#v-home'));
+  renderCalendar();
 }
 function emptyHTML(icon,col,title,text,actions=''){return `<div class="empty"><div class="big ${col}">${ic(icon)}</div><h3>${title}</h3><p>${text}</p>${actions?`<div class="btn-row" style="justify-content:center">${actions}</div>`:''}</div>`}
 
@@ -688,6 +673,7 @@ document.addEventListener('click',async e=>{
   if(SEL.on){SEL.ids.has(id)?SEL.ids.delete(id):SEL.ids.add(id);t.classList.toggle('picked');drawSelbar();return;}
   const gridEl=t.closest('[data-view]');const v=gridEl?.dataset.view||VIEW;const ids=LAST[v]||[id];openLB(ids,Math.max(0,ids.indexOf(id)));
 });
+document.addEventListener('click',e=>{if(e.target.closest('[data-homemore]')){SHOWN.home+=60;renderHome();}});
 document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches?.('[data-tile]')){e.preventDefault();e.target.click();}});
 
 /* ---------- LIBRARY & COLLECTION ---------- */
@@ -732,7 +718,7 @@ function groupStripHTML(view){
   const avatar=mid=>{const list=[...MEDIA.values()].filter(m=>m.cat==='member'&&m.memberIds?.[0]===mid&&m.thumb);return list.length?thumbURL(list.sort((a,b)=>b.added-a.added)[0]):null;};
   return `<div class="panel gstrip" style="--gcol:${esc(g.color)}">
    <div class="gstrip-h"><h3><span class="dot"></span>${esc(g.name)}</h3><span class="muted" style="font-size:12.5px">${esc(g.agency||'')} · ${genLabel(g.gen)}</span>
-    <button class="btn sm ghost" style="margin-left:auto" data-act="edit-group" data-id="${g.id}">${ic('edit')}編集</button></div>
+</div>
    ${mem.length?`<div class="avatars"><button class="av ${!f.member?'on':''}" data-pickmember=""><span class="ph">ALL</span><span>全員</span></button>${mem.map(m=>{const u=avatar(m.id);return `<button class="av ${f.member===m.id?'on':''}" data-pickmember="${m.id}"><span class="ph">${u?`<img src="${u}" alt="">`:esc(m.name.slice(0,1))}</span><span>${esc(m.name)}</span></button>`}).join('')}</div>`:`<p class="note" style="margin:0">メンバーが未登録です。「編集」から追加できます。</p>`}
    ${ch.length?`<div class="chips">${ch.map(c=>`<button class="chip ${f.chemi===c.id?'on':''}" data-pickchemi="${c.id}">${ic('chemi')}${esc(c.name)}</button>`).join('')}</div>`:''}
   </div>`;
@@ -743,7 +729,7 @@ function renderGridView(view){
   const isCol=view==='collection';
   const head=isCol?`<div class="sec-h"><div><div class="eyebrow">MY COLLECTION</div><h2>☆ お気に入り</h2></div></div>`:libHeadHTML();
   let body;
-  if(!MEDIA.size)body=`<div class="panel">${emptyHTML('image','c-pink','まだ写真・動画がありません','「追加」から複数の写真・動画をまとめて保存できます。','<button class="btn primary" data-go="add">'+ic('plus')+'まとめて追加</button>')}</div>`;
+  if(!MEDIA.size)body=`<div class="panel">${emptyHTML('image','c-pink','まだ写真・動画がありません','「追加」タブから、複数の写真・動画をまとめて保存できます。')}</div>`;
   else if(!list.length)body=`<div class="panel">${isCol&&![...MEDIA.values()].some(m=>m.fav)?emptyHTML('star','c-pink','☆を付けた写真がここに集まります','ライブラリで写真の☆をタップすると、My Collectionに登録されます。','<button class="btn primary" data-go="library">ライブラリを開く</button>'):emptyHTML('search','c-lilac','条件に合う写真がありません','絞り込み条件を変えるか、リセットしてください。','<button class="btn" data-act="reset-filters">条件をリセット</button>')}</div>`;
   else body=`<div class="resline"><span><b>${list.length}</b> 件</span>
      <span class="sp"><button class="btn sm ${SEL.on?'primary':''}" data-act="toggle-select">${ic('select')}${SEL.on?'選択を終了':'選択'}</button>
@@ -754,7 +740,7 @@ function renderGridView(view){
   root.dataset.view=view;hydrate(root);
 }
 function bindFilters(){
-  ['library','collection'].forEach(view=>{
+  ['library'].forEach(view=>{
     const root=$('#v-'+view);
     root.addEventListener('change',e=>{if(view==='library'&&LIB.mode!=='search')return;const k=e.target.dataset.f;if(!k||k==='q')return;const f=F[view];f[k]=e.target.value;
       if(k==='agency'||k==='gen'){if(f.group&&!(G.get(f.group)&&(!f.agency||G.get(f.group).agency===f.agency)&&(!f.gen||G.get(f.group).gen===f.gen))){f.group='';f.member='';f.chemi=''}}
@@ -857,7 +843,7 @@ function masonryBlock(list,title,addAttrs){
      <select id="browse-sort" aria-label="並び順">${opt('new','新しい順',LIB.sort)}${opt('old','古い順',LIB.sort)}</select></span></div>
     <div class="masonry nocat ${SEL.on?'selecting':''}" data-view="library">${shown.map(tileHTML).join('')}</div>
     ${l.length>shown.length?`<div style="text-align:center"><button class="btn" data-libmore="1">もっと見る（残り${l.length-shown.length}件）</button></div>`:''}`
-    :`<div class="panel">${emptyHTML('image','c-pink','まだ写真がありません','ここに入れたい写真をまとめて追加できます。',`<button class="btn primary" ${addAttrs}>${ic('plus')}ここに追加</button>`)}</div>`}</div>`;
+    :`<div class="panel">${emptyHTML('image','c-pink','まだ写真がありません','「追加」タブで分類をこのボードに合わせて保存すると、ここに並びます。')}</div>`}</div>`;
 }
 function subBoardsBlock(owner,title){
   const subs=subsOf(owner);
@@ -885,7 +871,7 @@ function renderLibrary(){
     const groups=sortedGroups();
     body=`<div class="bsec"><div class="bsec-h"><h3>グループ</h3><span>${groups.length}</span><span style="margin-left:auto">${ic('camera')} で表紙を変更</span></div>
       ${groups.length?`<div class="boards">${groups.map(x=>{const l=boardList('G:'+x.id);return boardCardHTML('g:'+x.id,x.name,x.emoji,l,`data-libg="${x.id}"`,{meta:`写真 ${l.length}件・メンバー ${membersOf(x.id).length}人`,edit:true})}).join('')}${addBoardHTML('グループを追加','data-act="new-group"')}</div>`
-      :`<div class="panel">${emptyHTML('users','c-sky','まずはグループを登録','グループを登録すると、ここにボードとして並びます。','<button class="btn primary" data-act="new-group">'+ic('plus')+'グループを追加</button> <button class="btn" data-act="go-room-groups">プリセットから選ぶ</button>')}</div>`}</div>`;
+      :`<div class="boards">${addBoardHTML('グループを追加','data-act="new-group"')}</div><p class="note" style="margin:0">まずはグループを登録しましょう。有名グループはプリセットから選べます。</p>`}</div>`;
   }else{
     crumbs.push(`<button data-crumb="root">ライブラリ</button>`);
     const secLabel=SECS.find(x=>x[0]===LIB.sec)?.[1]||'';
@@ -1111,6 +1097,7 @@ function openGroupModal(gid,done){
   const st={name:g?.name||'',agency:g?.agency||'',gen:g?.gen||'5',color:g?.color||COLORS[CAT.groups.length%COLORS.length],newAgency:''};
   const m=openModal(`<h3>${g?'グループを編集':'グループを追加'}</h3>
    <div class="form-grid">
+    ${g?'':(()=>{const ex=new Set(CAT.groups.map(x=>x.name.toLowerCase()));const ps=PRESET_GROUPS.filter(p=>!ex.has(p[0].toLowerCase()));return ps.length?`<div class="field"><span class="flabel">プリセットから選ぶ（名前・事務所・世代が入ります）</span><div class="chips">${ps.map(p=>`<button type="button" class="chip" data-gpreset="${esc(p[0])}">${esc(p[0])}</button>`).join('')}</div></div>`:''})()}
     <div class="field"><label for="gm-name">グループ名</label><input type="text" id="gm-name" value="${esc(st.name)}" placeholder="例：SEVENTEEN"></div>
     <div class="row" style="align-items:flex-start;flex-wrap:wrap">
      <div class="field" style="flex:1 1 180px"><label for="gm-agency">事務所</label><select id="gm-agency">${opt('','選択してください',st.agency)}${CAT.agencies.map(a=>opt(a,a,st.agency)).join('')}${opt('__new','＋ 新しい事務所を入力',null)}</select>
@@ -1125,6 +1112,9 @@ function openGroupModal(gid,done){
    </div>
    <div class="acts">${g?`<button class="btn danger" data-a="del" style="margin-right:auto">削除</button>`:''}<button class="btn" data-a="cancel">キャンセル</button><button class="btn primary" data-a="save">保存</button></div>`);
   const ag=$('#gm-agency',m),agn=$('#gm-agency-new',m);
+  m.addEventListener('click',e=>{const p=e.target.closest('[data-gpreset]');if(!p)return;const pr=PRESET_GROUPS.find(x=>x[0]===p.dataset.gpreset);if(!pr)return;
+    $('#gm-name',m).value=pr[0];if(!CAT.agencies.includes(pr[1]))CAT.agencies.push(pr[1]);if(![...ag.options].some(o=>o.value===pr[1]))ag.add(new Option(pr[1],pr[1]),ag.options.length-1);ag.value=pr[1];agn.hidden=true;$('#gm-gen',m).value=pr[2];
+    $$('[data-gpreset]',m).forEach(x=>x.classList.toggle('on',x===p));});
   ag.addEventListener('change',()=>{agn.hidden=ag.value!=='__new';if(!agn.hidden)agn.focus()});
   $('#gm-sw',m).addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(!b)return;st.color=b.dataset.c;$$('#gm-sw button',m).forEach(x=>x.classList.toggle('on',x===b));});
   m.addEventListener('click',async e=>{
@@ -1296,7 +1286,7 @@ async function saveAdd(){
 
 /* ---------- CALENDAR ---------- */
 function renderCalendar(){
-  const root=$('#v-calendar');const all=[...MEDIA.values()];
+  const root=$('#home-cal');if(!root)return;const all=[...MEDIA.values()];
   const byDay=new Map();all.forEach(m=>{const k=dkey(tsOf(m));if(!byDay.has(k))byDay.set(k,[]);byDay.get(k).push(m)});
   byDay.forEach(l=>l.sort((a,b)=>tsOf(b)-tsOf(a)));
   const y=CAL.y,mo=CAL.m;const first=new Date(y,mo,1),days=new Date(y,mo+1,0).getDate(),lead=first.getDay();
@@ -1311,7 +1301,7 @@ function renderCalendar(){
   const dayList=CAL.day?(byDay.get(CAL.day)||[]):[];LAST.calendar=dayList.map(m=>m.id);
   const dd=CAL.day?new Date(CAL.day+'T00:00:00'):null;
   const basisWord=CAL.basis==='taken'?'の日付':'に追加';
-  root.innerHTML=`<div class="sec-h"><div><div class="eyebrow">CALENDAR</div><h2>カレンダー</h2></div></div>
+  root.innerHTML=`<div class="bsec-h"><h3>カレンダー</h3><span>写真を追加した日</span></div>
   <div class="cal-layout">
    <div class="panel" style="display:flex;flex-direction:column;gap:12px">
     <div class="cal-head"><button class="lb-btn" data-cal="prev" aria-label="前の月">${ic('left')}</button><h3>${y}年${mo+1}月</h3><button class="lb-btn" data-cal="next" aria-label="次の月">${ic('right')}</button><button class="btn sm ghost" data-cal="today">今月</button></div>
@@ -1323,14 +1313,14 @@ function renderCalendar(){
    <div class="panel" style="display:flex;flex-direction:column;gap:12px">
     ${dd?`<div class="sec-h"><h2 style="font-size:16px">${dd.getMonth()+1}月${dd.getDate()}日（${WD[dd.getDay()]}）${basisWord}</h2><span class="muted" style="font-size:13px">${dayList.length}件</span></div>
      ${dayList.length?`<div class="grid" data-view="calendar">${dayList.map(tileHTML).join('')}</div>`:'<p class="note" style="margin:0">この日の写真・動画はありません。</p>'}`
-     :emptyHTML('cal','c-lilac','この月の記録はまだありません','写真や動画を追加すると、その日のマスにサムネイルと件数が表示されます。','<button class="btn primary" data-go="add">'+ic('plus')+'まとめて追加</button>')}
+     :emptyHTML('cal','c-lilac','この月の記録はまだありません','写真や動画を追加すると、その日のマスにサムネイルと件数が表示されます。')}
     ${activeDays.length>1?`<div class="flabel" style="margin-top:4px">この月の記録</div><div class="daylist">${activeDays.map(k=>{const l=byDay.get(k);const d=new Date(k+'T00:00:00');const c=l.find(m=>m.thumb);const names=[...new Set(l.map(titleOf))].slice(0,4).join('、');return `<button class="dayrow" data-cday="${k}">${c?`<img src="${thumbURL(c)}" alt="">`:'<span class="ph0"></span>'}<span class="t"><b>${d.getMonth()+1}/${d.getDate()}（${WD[d.getDay()]}）· ${l.length}件</b><span>${esc(names)}</span></span></button>`}).join('')}</div>`:''}
    </div>
   </div>`;
   hydrate(root);
 }
-$('#v-calendar').addEventListener('click',e=>{
-  const c=e.target.closest('[data-cday]');if(c){CAL.day=c.dataset.cday;renderCalendar();if(c.classList.contains('dayrow'))$('#v-calendar .cal-layout > .panel:last-child')?.scrollIntoView({behavior:'smooth',block:'start'});return;}
+$('#v-home').addEventListener('click',e=>{if(!e.target.closest('#home-cal'))return;
+  const c=e.target.closest('[data-cday]');if(c){CAL.day=c.dataset.cday;renderCalendar();if(c.classList.contains('dayrow'))$('#home-cal .cal-layout > .panel:last-child')?.scrollIntoView({behavior:'smooth',block:'start'});return;}
   const b=e.target.closest('[data-cbasis]');if(b){CAL.basis=b.dataset.cbasis;CAL.day='';renderCalendar();return;}
   const a=e.target.closest('[data-cal]')?.dataset.cal;if(!a)return;
   if(a==='prev'){CAL.m--;if(CAL.m<0){CAL.m=11;CAL.y--}}
@@ -1343,32 +1333,16 @@ $('#v-calendar').addEventListener('click',e=>{
 async function renderRoom(){
   const root=$('#v-room');
   const wall=await getMeta('wallpaper').catch(()=>null);const wu=wall?URL.createObjectURL(wall):null;
-  const groups=sortedGroups();const existing=new Set(CAT.groups.map(g=>g.name.toLowerCase()));
-  const presets=PRESET_GROUPS.filter(p=>!existing.has(p[0].toLowerCase()));
   let usage='';try{const e=await navigator.storage?.estimate?.();if(e)usage=`使用中 ${fmtSize(e.usage||0)} / 目安上限 ${fmtSize(e.quota||0)}`}catch(_){}
   root.innerHTML=`<div class="sec-h"><div><div class="eyebrow">PERSONALIZE</div><h2>My Room</h2></div></div>
   <div class="room-grid">
-   <div class="panel" style="display:flex;flex-direction:column;gap:12px">
-    <div class="sec-h"><h2 style="font-size:16px">表示モード</h2><span class="eyebrow">THEME</span></div>
-    <div class="seg" role="group" aria-label="表示モード">${[['auto','端末に合わせる'],['light','ライト'],['dark','ダーク']].map(([v,l])=>`<button class="${THEME===v?'on':''}" data-theme-set="${v}">${v==='light'?ic('sun'):v==='dark'?ic('moon'):''} ${l}</button>`).join('')}</div>
-    <p class="note" style="margin:0">右上の ${ic('moon')} ボタンでもすぐ切り替えられます。</p>
-   </div>
    <div class="panel" id="room-wall" style="display:flex;flex-direction:column;gap:14px">
     <div class="sec-h"><h2 style="font-size:16px">壁紙</h2><span class="eyebrow">WALLPAPER</span></div>
     <div class="wall-prev">${wu?`<img src="${wu}" alt="現在の壁紙">`:'初期デザイン（壁紙なし）'}</div>
-    <div class="btn-row"><button class="btn primary" data-act="pick-wall">${ic('image')}写真から選ぶ</button><button class="btn" data-act="wall-from-lib">ライブラリから選ぶ</button>${wu?`<button class="btn ghost" data-act="reset-wall">初期デザインに戻す</button>`:''}</div>
+    <div class="btn-row"><button class="btn primary" data-act="pick-wall">${ic('image')}写真から選ぶ</button>${wu?`<button class="btn ghost" data-act="reset-wall">初期デザインに戻す</button>`:''}</div>
     <div class="field"><label for="rm-shade">文字を読みやすくする（重ねる色の濃さ） <span class="muted" id="rm-shade-v">${Math.round(SET.shade*100)}%</span></label><input type="range" id="rm-shade" min="0" max="0.9" step="0.05" value="${SET.shade}"></div>
     <div class="field"><label for="rm-blur">壁紙のぼかし <span class="muted" id="rm-blur-v">${SET.blur}px</span></label><input type="range" id="rm-blur" min="0" max="24" step="1" value="${SET.blur}"></div>
-    <p class="note" style="margin:0">ライブラリの写真を開いて「壁紙に設定」ボタンを押しても変えられます。</p>
-   </div>
-   <div class="panel" id="room-groups" style="display:flex;flex-direction:column;gap:12px">
-    <div class="sec-h"><h2 style="font-size:16px">グループ・メンバー</h2><span class="eyebrow">GROUPS</span><button class="btn sm primary" style="margin-left:auto" data-act="new-group">${ic('plus')}追加</button></div>
-    <div class="glist">${groups.map(g=>{const mem=membersOf(g.id);return `<div class="grow" style="--gcol:${esc(g.color)}"><div class="grow-h"><b><span class="dot"></span>${esc(g.name)}</b><span class="tag">${esc(g.agency||'事務所未設定')}</span><span class="tag">${genLabel(g.gen)}</span><button class="btn sm" data-act="edit-group" data-id="${g.id}">編集</button></div><div class="mem">${mem.length?mem.map(x=>esc(x.name)).join('・'):'メンバー未登録'}</div></div>`}).join('')||'<p class="note" style="margin:0">まだグループがありません。「追加」か下のプリセットから登録してください。</p>'}</div>
-    ${presets.length?`<details class="presets" ${groups.length?'':'open'}><summary>プリセットから追加（事務所・世代つき）</summary><div class="chips" style="margin-top:10px">${presets.map(p=>`<button class="chip" data-preset="${esc(p[0])}">＋ ${esc(p[0])} <span class="n">${esc(p[1])}・${p[2]}世代</span></button>`).join('')}</div><p class="note">プリセットはグループ名・事務所・世代だけを登録します。メンバーは「編集」から追加してください。</p></details>`:''}
-   </div>
-   <div class="panel" style="display:flex;flex-direction:column;gap:12px">
-    <div class="sec-h"><h2 style="font-size:16px">ケミ</h2><span class="eyebrow">CHEMISTRY</span><button class="btn sm primary" style="margin-left:auto" data-act="new-chemi">${ic('plus')}作る</button></div>
-    ${CAT.chemis.length?`<div class="chips">${CAT.chemis.map(c=>`<button class="chip" data-act="edit-chemi" data-id="${c.id}">${ic('chemi')}${esc(c.name)} <span class="n">${[...MEDIA.values()].filter(m=>m.chemiId===c.id).length}</span></button>`).join('')}</div>`:'<p class="note" style="margin:0">好きな組み合わせ（ペア・ユニット）を登録すると、ケミ写真として整理・検索できます。グループをまたいだ組み合わせも作れます。</p>'}
+    <p class="note" style="margin:0">保存済みの写真を壁紙にするときは、写真を開いて ${ic('wall')} を押します。</p>
    </div>
    <div class="panel" style="display:flex;flex-direction:column;gap:12px">
     <div class="sec-h"><h2 style="font-size:16px">バックアップ</h2><span class="eyebrow">BACKUP</span></div>
